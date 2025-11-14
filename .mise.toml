@@ -1,0 +1,8 @@
+# mise configuration for gemini-nano-banana-tool
+
+[tools]
+python = "3.14"
+
+[env]
+# Ensure project uses local virtual environment
+_.python.venv = { path = ".venv", create = true }

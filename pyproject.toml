@@ -1,0 +1,46 @@
+[project]
+name = "gemini-nano-banana-tool"
+version = "1.0.0"
+description = "A professional CLI for generating, editing, and manipulating images using Google's Gemini 2.5 Flash Image model (codename 'Nano Banana')"
+requires-python = ">=3.14"
+dependencies = [
+    "click>=8.1.7",
+    "google-genai>=1.0.0",
+    "pillow>=10.0.0",
+]
+authors = [
+    {name = "Dennis Vriend", email = "dvriend@ilionx.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+
+[project.scripts]
+gemini-nano-banana-tool = "gemini_nano_banana_tool.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8.0",
+    "mypy>=1.7.0",
+    "pytest>=7.4.0",
+    "types-pillow>=10.0.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = []
+
+[tool.mypy]
+python_version = "3.14"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+strict = true
