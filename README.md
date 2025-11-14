@@ -20,6 +20,7 @@ A professional CLI for generating, editing, and manipulating images using Google
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
+  - [Promptgen Command](#promptgen-command)
   - [Generate Command](#generate-command)
   - [List Commands](#list-commands)
 - [Library Usage](#library-usage)
@@ -65,6 +66,8 @@ This tool provides a **professional, agent-friendly CLI** for Gemini image gener
 
 ## Features
 
+- ✅ **AI Prompt Generation** - Transform simple descriptions into detailed prompts using Gemini 2.0 Flash
+- ✅ **Prompt Templates** - 6 specialized templates (photography, character, scene, food, abstract, logo)
 - ✅ **Text-to-Image Generation** - Create images from detailed text prompts
 - ✅ **Image Editing** - Edit existing images with up to 3 reference images
 - ✅ **Multiple Aspect Ratios** - Support for 10 different aspect ratios
@@ -145,6 +148,92 @@ export GOOGLE_CLOUD_LOCATION='us-central1'
 - Authenticated with `gcloud auth application-default login`
 
 ## Usage
+
+### Promptgen Command
+
+The `promptgen` command transforms simple descriptions into detailed, best-practice prompts using AI.
+
+#### Why Use Promptgen?
+
+Creating effective image generation prompts requires specific knowledge about:
+- Photography and composition terminology
+- Lighting and technical details
+- Artistic styles and techniques
+- Color theory and palettes
+
+The `promptgen` command uses Gemini 2.0 Flash to automatically generate detailed, optimized prompts from simple descriptions.
+
+#### Basic Usage
+
+```bash
+# Simple description → detailed prompt
+gemini-nano-banana-tool promptgen "wizard cat"
+
+# Output:
+# A majestic, fluffy Persian cat wearing an ornate, pointed wizard hat
+# adorned with celestial symbols, perched upon a stack of ancient,
+# leather-bound spellbooks in a dimly lit, gothic library...
+```
+
+#### With Templates
+
+Templates apply best practices for specific categories:
+
+```bash
+# Character design template
+gemini-nano-banana-tool promptgen "wizard cat" --template character
+
+# Food photography template
+gemini-nano-banana-tool promptgen "pasta dish" --template food
+
+# Scene composition template
+gemini-nano-banana-tool promptgen "cyberpunk city" --template scene
+```
+
+Available templates:
+- `photography` - Professional photography with technical details
+- `character` - Character design with pose and attire
+- `scene` - Scene composition with foreground/midground/background
+- `food` - Food photography with plating and lighting
+- `abstract` - Abstract art with shapes and colors
+- `logo` - Logo design with typography
+
+#### Output Formats
+
+```bash
+# Plain text (default) - perfect for piping
+gemini-nano-banana-tool promptgen "sunset"
+
+# JSON output - for automation and scripts
+gemini-nano-banana-tool promptgen "sunset" --json
+
+# Verbose output - educational, shows analysis
+gemini-nano-banana-tool promptgen "sunset" --verbose
+
+# Save to file for reuse
+gemini-nano-banana-tool promptgen "sunset" -o prompt.txt
+```
+
+#### Complete Workflow: Generate Prompt → Create Image
+
+```bash
+# Single pipeline: description → prompt → image
+gemini-nano-banana-tool promptgen "wizard cat in magical library" | \
+  gemini-nano-banana-tool generate -o wizard-cat.png --stdin -a 16:9
+
+# Or save prompt for reuse
+gemini-nano-banana-tool promptgen "cyberpunk city at night" \
+  --template scene -o city-prompt.txt
+
+gemini-nano-banana-tool generate -o city1.png -f city-prompt.txt -a 16:9
+gemini-nano-banana-tool generate -o city2.png -f city-prompt.txt -a 1:1
+```
+
+#### List Available Templates
+
+```bash
+gemini-nano-banana-tool promptgen --list-templates
+```
 
 ### Generate Command
 
@@ -276,6 +365,32 @@ Available Aspect Ratios:
 
 Import and use programmatically in your Python code:
 
+### Prompt Generation
+
+```python
+from gemini_nano_banana_tool import create_client, generate_prompt
+
+# Create client
+client = create_client()  # Uses GEMINI_API_KEY from environment
+
+# Generate detailed prompt from simple description
+result = generate_prompt(
+    client=client,
+    description="wizard cat",
+    template="character",  # Optional: use template
+    style="photorealistic",  # Optional: style hint
+)
+
+print(f"Original: {result['original']}")
+print(f"Generated Prompt: {result['prompt']}")
+print(f"Tokens used: {result['tokens_used']}")
+
+# Use the generated prompt for image generation
+detailed_prompt = result['prompt']
+```
+
+### Image Generation
+
 ```python
 from gemini_nano_banana_tool import create_client, generate_image, AspectRatio
 
@@ -303,7 +418,37 @@ result = generate_image(
     reference_images=["original.jpg"],
     aspect_ratio=AspectRatio.RATIO_1_1
 )
+```
 
+### Complete Workflow
+
+```python
+from gemini_nano_banana_tool import create_client, generate_prompt, generate_image
+
+# Create client (reuse for multiple operations)
+client = create_client()
+
+# Step 1: Generate optimized prompt
+prompt_result = generate_prompt(
+    client=client,
+    description="cyberpunk city at night",
+    template="scene"
+)
+
+# Step 2: Generate image with optimized prompt
+image_result = generate_image(
+    client=client,
+    prompt=prompt_result['prompt'],
+    output_path="cyberpunk-city.png",
+    aspect_ratio="16:9"
+)
+
+print(f"Image saved: {image_result['output_path']}")
+```
+
+### Vertex AI
+
+```python
 # Vertex AI client
 vertex_client = create_client(
     use_vertex=True,

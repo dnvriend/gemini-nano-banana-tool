@@ -19,6 +19,17 @@ from gemini_nano_banana_tool.core.models import (
     SUPPORTED_MODELS,
     AspectRatio,
 )
+from gemini_nano_banana_tool.core.prompt_templates import (
+    TEMPLATE_DESCRIPTIONS,
+    detect_category,
+    get_template,
+    list_templates,
+)
+from gemini_nano_banana_tool.core.promptgen import (
+    PromptGenerationError,
+    format_verbose_output,
+    generate_prompt,
+)
 
 __all__ = [
     # Client
@@ -29,6 +40,15 @@ __all__ = [
     # Generator
     "generate_image",
     "GenerationError",
+    # Promptgen
+    "generate_prompt",
+    "PromptGenerationError",
+    "format_verbose_output",
+    # Templates
+    "get_template",
+    "detect_category",
+    "list_templates",
+    "TEMPLATE_DESCRIPTIONS",
     # Models
     "AspectRatio",
     "ASPECT_RATIO_RESOLUTIONS",

@@ -6,7 +6,12 @@ and has been reviewed and tested by a human.
 
 import click
 
-from gemini_nano_banana_tool.commands import generate, list_aspect_ratios, list_models
+from gemini_nano_banana_tool.commands import (
+    generate,
+    list_aspect_ratios,
+    list_models,
+    promptgen,
+)
 
 
 @click.group()
@@ -21,6 +26,7 @@ def main(ctx: click.Context) -> None:
 
     \b
     Key Features:
+      • AI-powered prompt generation from simple descriptions
       • Text-to-image generation with detailed prompts
       • Image editing with up to 3 reference images
       • Multiple aspect ratios (1:1, 16:9, 9:16, etc.)
@@ -40,6 +46,13 @@ def main(ctx: click.Context) -> None:
 
     \b
     Examples:
+      # Generate detailed prompt from simple description
+      gemini-nano-banana-tool promptgen "wizard cat"
+
+      # Generate prompt and create image in one pipeline
+      gemini-nano-banana-tool promptgen "wizard cat" | \\
+        gemini-nano-banana-tool generate -o cat.png --stdin
+
       # Generate image from text
       gemini-nano-banana-tool generate -o cat.png --prompt "A cat wearing a wizard hat"
 
@@ -52,6 +65,7 @@ def main(ctx: click.Context) -> None:
 
     \b
     For detailed command help:
+      gemini-nano-banana-tool promptgen --help
       gemini-nano-banana-tool generate --help
       gemini-nano-banana-tool list-models --help
       gemini-nano-banana-tool list-aspect-ratios --help
@@ -61,6 +75,7 @@ def main(ctx: click.Context) -> None:
 
 
 # Register commands
+main.add_command(promptgen)
 main.add_command(generate)
 main.add_command(list_models)
 main.add_command(list_aspect_ratios)
