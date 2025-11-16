@@ -13,7 +13,9 @@
 [![Claude Sonnet 4.5](https://img.shields.io/badge/Model-Claude_Sonnet_4.5-blue)](https://www.anthropic.com/claude)
 [![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code-5A67D8.svg)](https://www.anthropic.com/claude/code)
 
-A professional CLI for generating, editing, and manipulating images using Google's Gemini 2.5 Flash Image model (codename "Nano Banana").
+**Gemini Nano Banana Tool** - Professional CLI for generating, editing, and manipulating images using Google's Gemini 2.5 Flash Image model
+
+</div>
 
 ## Table of Contents
 
