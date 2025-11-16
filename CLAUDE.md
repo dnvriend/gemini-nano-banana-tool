@@ -203,14 +203,13 @@ Main command for image generation.
 **Signature:**
 ```python
 @click.command()
+@click.argument("prompt", required=False)
 @click.option("-o", "--output", required=True, type=click.Path(),
               help="Output image file path")
-@click.option("-p", "--prompt", type=str,
-              help="Prompt text (mutually exclusive with --prompt-file and --stdin)")
 @click.option("-f", "--prompt-file", type=click.Path(exists=True),
-              help="Read prompt from file (mutually exclusive with --prompt and --stdin)")
+              help="Read prompt from file")
 @click.option("-s", "--stdin", is_flag=True,
-              help="Read prompt from stdin (mutually exclusive with --prompt and --prompt-file)")
+              help="Read prompt from stdin")
 @click.option("-i", "--image", "images", multiple=True, type=click.Path(exists=True),
               help="Reference image (can be used up to 3 times)")
 @click.option("-a", "--aspect-ratio", default="1:1",
@@ -225,30 +224,31 @@ Main command for image generation.
               help="Google Cloud project (for Vertex AI)")
 @click.option("--location", type=str,
               help="Google Cloud location (for Vertex AI)")
-@click.option("-v", "--verbose", is_flag=True,
-              help="Enable verbose output")
+@click.option("-v", "--verbose", count=True,
+              help="Multi-level verbosity (-v INFO, -vv DEBUG, -vvv TRACE)")
 def generate(...) -> None:
     """Generate images from text prompts with optional reference images."""
 ```
 
 **Validation:**
-- Exactly one of `--prompt`, `--prompt-file`, or `--stdin` must be provided
+- Exactly one of `PROMPT` (positional), `--prompt-file`, or `--stdin` must be provided
 - Maximum 3 reference images
 - Aspect ratio must be valid
 - Model must be in supported list
 
+**Verbosity Levels:**
+- `0` (no flag): WARNING only - minimal output
+- `-v` (1): INFO - high-level operations, authentication, generation status
+- `-vv` (2): DEBUG - detailed validation, API call details, file operations
+- `-vvv` (3+): TRACE - DEBUG + dependent library logging (HTTP requests, etc.)
+
 **Error Handling:**
+Uses structured logging at appropriate levels:
 ```python
-try:
-    result = generate_image(client, prompt, output_path, images, aspect_ratio, model)
-    click.echo(json.dumps(result), file=sys.stdout)
-except AuthenticationError as e:
-    click.echo(f"Authentication failed: {e}", err=True)
-    click.echo("Set GEMINI_API_KEY environment variable or use --api-key", err=True)
-    sys.exit(1)
-except GenerationError as e:
-    click.echo(f"Generation failed: {e}", err=True)
-    sys.exit(1)
+logger.info("Starting image generation...")
+logger.debug(f"Generation parameters: prompt_length={len(prompt_text)}, aspect_ratio={aspect_ratio}")
+logger.error(f"Image generation failed: {e}")
+logger.debug("Generation error details:", exc_info=True)
 ```
 
 ### list-models
@@ -328,7 +328,7 @@ make pipeline                  # format + check + build + install-global
 ```bash
 # Run without installing
 make run ARGS="--help"
-make run ARGS="generate -o test.png --prompt 'test'"
+make run ARGS="generate 'test prompt' -o test.png"
 
 # Or directly
 uv run gemini-nano-banana-tool --help

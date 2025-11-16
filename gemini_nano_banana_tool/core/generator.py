@@ -5,6 +5,7 @@ and has been reviewed and tested by a human.
 """
 
 import base64
+import logging
 from typing import Any
 
 from google import genai
@@ -15,6 +16,8 @@ from gemini_nano_banana_tool.core.models import (
     DEFAULT_MODEL,
 )
 from gemini_nano_banana_tool.utils import save_image
+
+logger = logging.getLogger(__name__)
 
 
 class GenerationError(Exception):
@@ -67,38 +70,57 @@ def generate_image(
         >>> print(f"Generated: {result['output_path']}")
     """
     try:
+        logger.debug(
+            f"Starting image generation: model={model}, aspect_ratio={aspect_ratio}, "
+            f"reference_images={len(reference_images) if reference_images else 0}"
+        )
+        logger.debug(f"Prompt length: {len(prompt)} characters")
+
         # Build contents for the generation request
         contents: list[types.Part] = []
 
         # Add reference images if provided
         if reference_images:
+            logger.info(f"Loading {len(reference_images)} reference image(s)")
             for img_path in reference_images:
                 try:
+                    logger.debug(f"Loading reference image: {img_path}")
                     with open(img_path, "rb") as f:
                         image_data = f.read()
+                    mime_type = _get_mime_type(img_path)
+                    logger.debug(
+                        f"Reference image loaded: {img_path}, "
+                        f"size={len(image_data)} bytes, mime_type={mime_type}"
+                    )
                     # Create Part with inline data
                     contents.append(
                         types.Part(
                             inline_data=types.Blob(
-                                mime_type=_get_mime_type(img_path),
+                                mime_type=mime_type,
                                 data=image_data,
                             )
                         )
                     )
                 except FileNotFoundError:
+                    logger.error(f"Reference image not found: {img_path}")
                     raise GenerationError(
                         f"Reference image not found: {img_path}. "
                         f"Ensure the file exists and the path is correct."
                     )
                 except PermissionError:
+                    logger.error(f"Permission denied reading reference image: {img_path}")
                     raise GenerationError(f"Permission denied reading reference image: {img_path}")
                 except Exception as e:
+                    logger.error(f"Failed to load reference image {img_path}: {e}")
+                    logger.debug("Reference image load error details:", exc_info=True)
                     raise GenerationError(f"Failed to load reference image {img_path}: {e}")
 
         # Add text prompt
+        logger.debug("Adding text prompt to request")
         contents.append(types.Part(text=prompt))
 
         # Configure generation with aspect ratio
+        logger.debug(f"Configuring generation: aspect_ratio={aspect_ratio}")
         config = types.GenerateContentConfig(
             response_modalities=["IMAGE"],
             image_config=types.ImageConfig(
@@ -107,27 +129,34 @@ def generate_image(
         )
 
         # Generate content
+        logger.info(f"Calling Gemini API: model={model}")
+        logger.debug(f"Request config: {config}")
         response = client.models.generate_content(
             model=model,
             contents=contents,  # type: ignore[arg-type]
             config=config,
         )
+        logger.debug("API call completed")
 
         # Extract image from response
         if not response.candidates:
+            logger.error("No candidates returned from API")
             raise GenerationError("No candidates returned from API. Request may have been blocked.")
 
         candidate = response.candidates[0]
+        logger.debug(f"Response has {len(response.candidates)} candidate(s)")
 
         # Check for content filtering
         if not candidate.content or not candidate.content.parts:
             finish_reason = getattr(candidate, "finish_reason", "UNKNOWN")
+            logger.error(f"No content generated, finish_reason={finish_reason}")
             raise GenerationError(
                 f"No content generated. Finish reason: {finish_reason}. "
                 f"The prompt may have been blocked by safety filters."
             )
 
         # Find the image part
+        logger.debug(f"Extracting image from {len(candidate.content.parts)} part(s)")
         image_part = None
         for part in candidate.content.parts:
             if hasattr(part, "inline_data") and part.inline_data:
@@ -135,12 +164,14 @@ def generate_image(
                 break
 
         if not image_part:
+            logger.error("No image data found in response")
             raise GenerationError(
                 "No image data found in response. The model may have returned text only."
             )
 
         # Decode and save image
         try:
+            logger.debug("Decoding and saving image...")
             # Handle both bytes and base64-encoded string
             if image_part.inline_data and image_part.inline_data.data:
                 image_bytes = (
@@ -148,23 +179,30 @@ def generate_image(
                     if isinstance(image_part.inline_data.data, str)
                     else image_part.inline_data.data
                 )
+                logger.debug(f"Image size: {len(image_bytes)} bytes")
                 save_image(image_bytes, output_path)
+                logger.info(f"Image saved successfully to: {output_path}")
             else:
+                logger.error("No image data available in response")
                 raise GenerationError("No image data available in response")
         except Exception as e:
+            logger.error(f"Failed to save generated image: {e}")
+            logger.debug("Image save error details:", exc_info=True)
             raise GenerationError(f"Failed to save generated image: {e}")
 
         # Extract token usage
         token_count = 0
         if hasattr(response, "usage_metadata") and response.usage_metadata:
             token_count = getattr(response.usage_metadata, "total_token_count", 0)
+        logger.debug(f"Token usage: {token_count}")
 
         # Format resolution
         width, height = ASPECT_RATIO_RESOLUTIONS.get(aspect_ratio, (0, 0))
         resolution = f"{width}x{height}"
+        logger.debug(f"Image resolution: {resolution}")
 
         # Build result
-        return {
+        result = {
             "output_path": output_path,
             "model": model,
             "aspect_ratio": aspect_ratio,
@@ -176,10 +214,14 @@ def generate_image(
                 "safety_ratings": getattr(candidate, "safety_ratings", None),
             },
         }
+        logger.debug(f"Generation completed successfully: {result}")
+        return result
 
     except GenerationError:
         raise
     except Exception as e:
+        logger.error(f"Image generation failed: {type(e).__name__}: {e}")
+        logger.debug("Generation error details:", exc_info=True)
         raise GenerationError(
             f"Image generation failed: {e}. "
             f"Check your API key, network connection, and input parameters."

@@ -167,9 +167,7 @@ def get_template(template_name: str) -> str:
     """
     if template_name not in TEMPLATES:
         available = ", ".join(TEMPLATES.keys())
-        raise ValueError(
-            f"Unknown template: {template_name}. Available templates: {available}"
-        )
+        raise ValueError(f"Unknown template: {template_name}. Available templates: {available}")
     return TEMPLATES[template_name]
 
 

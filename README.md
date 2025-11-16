@@ -1,5 +1,10 @@
 # gemini-nano-banana-tool 🍌
 
+<div align="center">
+  <img src=".github/assets/logo.png" alt="gemini-nano-banana-tool" width="200" />
+  <br>
+  <br>
+
 [![Python Version](https://img.shields.io/badge/python-3.14+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
@@ -219,14 +224,14 @@ gemini-nano-banana-tool promptgen "sunset" -o prompt.txt
 ```bash
 # Single pipeline: description → prompt → image
 gemini-nano-banana-tool promptgen "wizard cat in magical library" | \
-  gemini-nano-banana-tool generate -o wizard-cat.png --stdin -a 16:9
+  gemini-nano-banana-tool generate --stdin -o wizard-cat.png -a 16:9
 
 # Or save prompt for reuse
 gemini-nano-banana-tool promptgen "cyberpunk city at night" \
   --template scene -o city-prompt.txt
 
-gemini-nano-banana-tool generate -o city1.png -f city-prompt.txt -a 16:9
-gemini-nano-banana-tool generate -o city2.png -f city-prompt.txt -a 1:1
+gemini-nano-banana-tool generate -f city-prompt.txt -o city1.png -a 16:9
+gemini-nano-banana-tool generate -f city-prompt.txt -o city2.png -a 1:1
 ```
 
 #### List Available Templates
@@ -242,12 +247,11 @@ The `generate` command creates images from text prompts with optional reference 
 #### Basic Text-to-Image
 
 ```bash
-# Simple generation
-gemini-nano-banana-tool generate -o cat.png --prompt "A photorealistic cat wearing a wizard hat"
+# Simple generation with positional argument
+gemini-nano-banana-tool generate "A photorealistic cat wearing a wizard hat" -o cat.png
 
 # With specific aspect ratio
-gemini-nano-banana-tool generate -o wide.png --aspect-ratio 16:9 \
-  --prompt "A panoramic mountain landscape at golden hour"
+gemini-nano-banana-tool generate "Panoramic mountain landscape" -o wide.png --aspect-ratio 16:9
 ```
 
 #### Prompt from File
@@ -264,40 +268,53 @@ echo "A beautiful sunset" | gemini-nano-banana-tool generate -o sunset.png --std
 
 ```bash
 # Edit with single reference image
-gemini-nano-banana-tool generate -o edited.png \
-  --image original.jpg \
-  --prompt "Add a birthday hat to the person"
+gemini-nano-banana-tool generate "Add a birthday hat to the person" -o edited.png \
+  --image original.jpg
 
 # Multiple reference images (up to 3)
-gemini-nano-banana-tool generate -o fashion.png \
+gemini-nano-banana-tool generate "Put the dress on the model in a garden setting" -o fashion.png \
   --image dress.jpg \
-  --image model.jpg \
-  --prompt "Put the dress on the model in a garden setting"
+  --image model.jpg
 ```
 
 #### Different Aspect Ratios
 
 ```bash
 # Square (Instagram post)
-gemini-nano-banana-tool generate -o square.png --aspect-ratio 1:1 --prompt "..."
+gemini-nano-banana-tool generate "Modern minimalist design" -o square.png --aspect-ratio 1:1
 
 # Landscape (YouTube thumbnail)
-gemini-nano-banana-tool generate -o landscape.png --aspect-ratio 16:9 --prompt "..."
+gemini-nano-banana-tool generate "Epic cinematic scene" -o landscape.png --aspect-ratio 16:9
 
 # Portrait (Instagram story)
-gemini-nano-banana-tool generate -o portrait.png --aspect-ratio 9:16 --prompt "..."
+gemini-nano-banana-tool generate "Vertical portrait" -o portrait.png --aspect-ratio 9:16
 
 # Cinematic (ultra-wide)
-gemini-nano-banana-tool generate -o cinema.png --aspect-ratio 21:9 --prompt "..."
+gemini-nano-banana-tool generate "Sci-fi panorama" -o cinema.png --aspect-ratio 21:9
+```
+
+#### Verbosity Levels
+
+```bash
+# Normal mode (warnings only)
+gemini-nano-banana-tool generate "test" -o output.png
+
+# Verbose mode (INFO level) - show high-level operations
+gemini-nano-banana-tool generate "test" -o output.png -v
+
+# Debug mode (DEBUG level) - show detailed validation and API calls
+gemini-nano-banana-tool generate "test" -o output.png -vv
+
+# Trace mode (DEBUG + library internals) - show full HTTP requests and library logs
+gemini-nano-banana-tool generate "test" -o output.png -vvv
 ```
 
 #### Model Selection
 
 ```bash
 # Use specific model
-gemini-nano-banana-tool generate -o output.png \
-  --model gemini-2.0-flash-exp \
-  --prompt "Your prompt"
+gemini-nano-banana-tool generate "Your prompt" -o output.png \
+  --model gemini-2.0-flash-exp
 
 # Default model is gemini-2.5-flash-image
 ```
@@ -305,13 +322,15 @@ gemini-nano-banana-tool generate -o output.png \
 #### Complete Options
 
 ```bash
-gemini-nano-banana-tool generate [OPTIONS]
+gemini-nano-banana-tool generate [PROMPT] [OPTIONS]
+
+Arguments:
+  PROMPT                         Text prompt (mutually exclusive with --prompt-file and --stdin)
 
 Options:
   -o, --output PATH              Output image file path [required]
-  -p, --prompt TEXT              Prompt text (mutually exclusive with --prompt-file and --stdin)
-  -f, --prompt-file PATH         Read prompt from file (mutually exclusive with --prompt and --stdin)
-  -s, --stdin                    Read prompt from stdin (mutually exclusive with --prompt and --prompt-file)
+  -f, --prompt-file PATH         Read prompt from file
+  -s, --stdin                    Read prompt from stdin
   -i, --image PATH               Reference image (can be used up to 3 times)
   -a, --aspect-ratio TEXT        Aspect ratio (default: 1:1)
   -m, --model TEXT               Gemini model (default: gemini-2.5-flash-image)
@@ -319,7 +338,7 @@ Options:
   --use-vertex                   Use Vertex AI instead of Developer API
   --project TEXT                 Google Cloud project (for Vertex AI)
   --location TEXT                Google Cloud location (for Vertex AI)
-  -v, --verbose                  Enable verbose output
+  -v, --verbose                  Multi-level verbosity (-v INFO, -vv DEBUG, -vvv TRACE)
   --help                         Show this message and exit
 ```
 

@@ -53,9 +53,7 @@ def generate_prompt(
         'Photorealistic image of a wizard cat...'
     """
     # Auto-detect category if not specified and no template
-    detected_category = category or (
-        detect_category(description) if not template else None
-    )
+    detected_category = category or (detect_category(description) if not template else None)
 
     # Build system prompt with best practices
     system_prompt = """You are an expert prompt engineer for Gemini 2.5 Flash Image (Nano Banana).
@@ -121,11 +119,7 @@ Make the prompt detailed but concise (aim for 50-100 words).
         generated_prompt = text_content.strip()
 
         # Get token count
-        token_count = (
-            response.usage_metadata.total_token_count
-            if response.usage_metadata
-            else 0
-        )
+        token_count = response.usage_metadata.total_token_count if response.usage_metadata else 0
 
         return {
             "prompt": generated_prompt,

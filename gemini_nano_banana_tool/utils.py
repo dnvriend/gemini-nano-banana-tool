@@ -4,6 +4,7 @@ Note: This code was generated with assistance from AI coding tools
 and has been reviewed and tested by a human.
 """
 
+import logging
 import os
 import sys
 from pathlib import Path
@@ -13,6 +14,8 @@ from gemini_nano_banana_tool.core.models import (
     MAX_REFERENCE_IMAGES,
     SUPPORTED_MODELS,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ValidationError(Exception):
@@ -26,10 +29,10 @@ def load_prompt(
     prompt_file: str | None,
     use_stdin: bool,
 ) -> str:
-    """Load prompt from argument, file, or stdin (mutually exclusive).
+    """Load prompt from positional argument, file, or stdin (mutually exclusive).
 
     Args:
-        prompt: Direct prompt text
+        prompt: Direct prompt text from positional argument
         prompt_file: Path to file containing prompt
         use_stdin: Whether to read from stdin
 
@@ -40,7 +43,7 @@ def load_prompt(
         ValidationError: If multiple sources provided, none provided, or loading fails
 
     Example:
-        >>> # From argument
+        >>> # From positional argument
         >>> prompt = load_prompt("Hello world", None, False)
         >>>
         >>> # From file
@@ -50,47 +53,64 @@ def load_prompt(
         >>> prompt = load_prompt(None, None, True)
     """
     # Check mutually exclusive
+    logger.debug("Loading prompt from source...")
     provided = [prompt is not None, prompt_file is not None, use_stdin]
     if sum(provided) == 0:
+        logger.error("No prompt source provided")
         raise ValidationError(
-            "No prompt provided. Use one of: --prompt TEXT, --prompt-file FILE, or --stdin"
+            "No prompt provided. Use one of: PROMPT (positional), --prompt-file FILE, or --stdin"
         )
     if sum(provided) > 1:
+        logger.error(f"Multiple prompt sources provided: {provided}")
         raise ValidationError(
-            "Multiple prompt sources provided. Use only one of: --prompt, --prompt-file, or --stdin"
+            "Multiple prompt sources provided. "
+            "Use only one of: PROMPT (positional), --prompt-file, or --stdin"
         )
 
     # Load from appropriate source
     if prompt:
+        logger.debug("Loading prompt from argument")
         return prompt.strip()
 
     if prompt_file:
+        logger.debug(f"Loading prompt from file: {prompt_file}")
         try:
             with open(prompt_file, encoding="utf-8") as f:
                 content = f.read().strip()
             if not content:
+                logger.error(f"Prompt file is empty: {prompt_file}")
                 raise ValidationError(f"Prompt file is empty: {prompt_file}")
+            logger.debug(f"Prompt loaded from file: {len(content)} characters")
             return content
         except FileNotFoundError:
+            logger.error(f"Prompt file not found: {prompt_file}")
             raise ValidationError(
                 f"Prompt file not found: {prompt_file}. "
                 f"Ensure the file exists and the path is correct."
             )
         except PermissionError:
+            logger.error(f"Permission denied reading prompt file: {prompt_file}")
             raise ValidationError(f"Permission denied reading prompt file: {prompt_file}")
         except Exception as e:
+            logger.error(f"Failed to read prompt file {prompt_file}: {e}")
+            logger.debug("Prompt file read error details:", exc_info=True)
             raise ValidationError(f"Failed to read prompt file {prompt_file}: {e}")
 
     if use_stdin:
+        logger.debug("Loading prompt from stdin")
         try:
             content = sys.stdin.read().strip()
             if not content:
+                logger.error("No input received from stdin")
                 raise ValidationError(
                     "No input received from stdin. "
                     "Pipe content or use --prompt or --prompt-file instead."
                 )
+            logger.debug(f"Prompt loaded from stdin: {len(content)} characters")
             return content
         except Exception as e:
+            logger.error(f"Failed to read from stdin: {e}")
+            logger.debug("Stdin read error details:", exc_info=True)
             raise ValidationError(f"Failed to read from stdin: {e}")
 
     # Should never reach here
@@ -110,7 +130,9 @@ def validate_reference_images(image_paths: list[str]) -> None:
         >>> validate_reference_images(["img1.jpg", "img2.jpg"])
         >>> # Raises ValidationError if more than 3 images or any don't exist
     """
+    logger.debug(f"Validating {len(image_paths)} reference images")
     if len(image_paths) > MAX_REFERENCE_IMAGES:
+        logger.error(f"Too many reference images: {len(image_paths)} > {MAX_REFERENCE_IMAGES}")
         raise ValidationError(
             f"Too many reference images: {len(image_paths)}. "
             f"Maximum allowed is {MAX_REFERENCE_IMAGES}. "
@@ -118,13 +140,17 @@ def validate_reference_images(image_paths: list[str]) -> None:
         )
 
     for img_path in image_paths:
+        logger.debug(f"Validating reference image: {img_path}")
         if not os.path.exists(img_path):
+            logger.error(f"Reference image not found: {img_path}")
             raise ValidationError(
                 f"Reference image not found: {img_path}. "
                 f"Ensure the file exists and the path is correct."
             )
         if not os.path.isfile(img_path):
+            logger.error(f"Reference image path is not a file: {img_path}")
             raise ValidationError(f"Reference image path is not a file: {img_path}")
+    logger.debug("All reference images validated successfully")
 
 
 def validate_aspect_ratio(aspect_ratio: str) -> None:
@@ -185,19 +211,27 @@ def save_image(image_data: bytes, output_path: str) -> None:
         >>> save_image(b"\\x89PNG...", "output.png")
     """
     try:
+        logger.debug(f"Saving image to: {output_path}")
         # Ensure parent directory exists
         output_file = Path(output_path)
-        output_file.parent.mkdir(parents=True, exist_ok=True)
+        if not output_file.parent.exists():
+            logger.debug(f"Creating parent directory: {output_file.parent}")
+            output_file.parent.mkdir(parents=True, exist_ok=True)
 
         # Write image data
+        logger.debug(f"Writing {len(image_data)} bytes to file")
         with open(output_path, "wb") as f:
             f.write(image_data)
+        logger.debug(f"Image saved successfully to: {output_path}")
     except PermissionError:
+        logger.error(f"Permission denied writing to: {output_path}")
         raise ValidationError(
             f"Permission denied writing to: {output_path}. "
             f"Check directory permissions or choose a different location."
         )
     except OSError as e:
+        logger.error(f"Failed to save image to {output_path}: {e}")
+        logger.debug("Image save error details:", exc_info=True)
         raise ValidationError(f"Failed to save image to {output_path}: {e}")
 
 

@@ -12,6 +12,7 @@ import click
 from gemini_nano_banana_tool.core.client import AuthenticationError, create_client
 from gemini_nano_banana_tool.core.generator import GenerationError, generate_image
 from gemini_nano_banana_tool.core.models import DEFAULT_MODEL
+from gemini_nano_banana_tool.logging_config import get_logger, setup_logging
 from gemini_nano_banana_tool.utils import (
     ValidationError,
     format_resolution,
@@ -21,8 +22,11 @@ from gemini_nano_banana_tool.utils import (
     validate_reference_images,
 )
 
+logger = get_logger(__name__)
+
 
 @click.command()
+@click.argument("prompt", required=False)
 @click.option(
     "-o",
     "--output",
@@ -31,22 +35,16 @@ from gemini_nano_banana_tool.utils import (
     help="Output image file path (required)",
 )
 @click.option(
-    "-p",
-    "--prompt",
-    type=str,
-    help="Prompt text (mutually exclusive with --prompt-file and --stdin)",
-)
-@click.option(
     "-f",
     "--prompt-file",
     type=click.Path(exists=True),
-    help="Read prompt from file (mutually exclusive with --prompt and --stdin)",
+    help="Read prompt from file (mutually exclusive with prompt argument and --stdin)",
 )
 @click.option(
     "-s",
     "--stdin",
     is_flag=True,
-    help="Read prompt from stdin (mutually exclusive with --prompt and --prompt-file)",
+    help="Read prompt from stdin (mutually exclusive with prompt argument and --prompt-file)",
 )
 @click.option(
     "-i",
@@ -91,12 +89,12 @@ from gemini_nano_banana_tool.utils import (
 @click.option(
     "-v",
     "--verbose",
-    is_flag=True,
-    help="Enable verbose output",
+    count=True,
+    help="Enable verbose output (use -v for INFO, -vv for DEBUG, -vvv for TRACE)",
 )
 def generate(
-    output: str,
     prompt: str | None,
+    output: str,
     prompt_file: str | None,
     stdin: bool,
     images: tuple[str, ...],
@@ -106,21 +104,21 @@ def generate(
     use_vertex: bool,
     project: str | None,
     location: str | None,
-    verbose: bool,
+    verbose: int,
 ) -> None:
     """Generate images from text prompts with optional reference images.
 
     This command creates high-quality images using Google's Gemini AI models.
-    You can provide text prompts directly, from a file, or via stdin.
+    You can provide text prompts as a positional argument, from a file, or via stdin.
     Optionally include up to 3 reference images for image editing and composition.
 
     \b
     Examples:
-      # Basic text-to-image
-      gemini-nano-banana-tool generate -o cat.png --prompt "A cat wearing a wizard hat"
+      # Basic text-to-image with positional argument
+      gemini-nano-banana-tool generate "A cat wearing a wizard hat" -o cat.png
 
       # With aspect ratio
-      gemini-nano-banana-tool generate -o wide.png -a 16:9 --prompt "Panoramic landscape"
+      gemini-nano-banana-tool generate "Panoramic landscape" -o wide.png -a 16:9
 
       # From file
       gemini-nano-banana-tool generate -o output.png --prompt-file prompt.txt
@@ -129,13 +127,20 @@ def generate(
       echo "A sunset" | gemini-nano-banana-tool generate -o sunset.png --stdin
 
       # With reference image
-      gemini-nano-banana-tool generate -o edited.png -i photo.jpg \\
-        --prompt "Add a birthday hat"
+      gemini-nano-banana-tool generate "Add a birthday hat" -o edited.png -i photo.jpg
 
       # Multiple reference images
-      gemini-nano-banana-tool generate -o result.png \\
-        -i image1.jpg -i image2.jpg \\
-        --prompt "Combine these images"
+      gemini-nano-banana-tool generate "Combine these images" -o result.png \\
+        -i image1.jpg -i image2.jpg
+
+      # Verbose mode (INFO level)
+      gemini-nano-banana-tool generate "test prompt" -o output.png -v
+
+      # Debug mode (DEBUG level)
+      gemini-nano-banana-tool generate "test prompt" -o output.png -vv
+
+      # Trace mode (DEBUG + library internals)
+      gemini-nano-banana-tool generate "test prompt" -o output.png -vvv
 
     \b
     Output Format:
@@ -169,39 +174,48 @@ def generate(
       For Vertex AI, set GOOGLE_GENAI_USE_VERTEXAI=true,
       GOOGLE_CLOUD_PROJECT, and GOOGLE_CLOUD_LOCATION.
     """
+    # Setup logging based on verbosity
+    setup_logging(verbose)
+    logger.info("Starting image generation command")
+
     try:
-        # Verbose output
-        if verbose:
-            click.echo(f"Output file: {output}", err=True)
-            click.echo(f"Aspect ratio: {aspect_ratio}", err=True)
-            click.echo(f"Model: {model}", err=True)
-            if images:
-                click.echo(f"Reference images: {len(images)}", err=True)
+        # Log command configuration
+        logger.info(f"Output file: {output}")
+        logger.debug(f"Aspect ratio: {aspect_ratio}")
+        logger.debug(f"Model: {model}")
+        if images:
+            logger.info(f"Reference images: {len(images)}")
 
         # Load and validate prompt
         try:
             prompt_text = load_prompt(prompt, prompt_file, stdin)
-            if verbose:
-                click.echo(f"Prompt loaded ({len(prompt_text)} characters)", err=True)
+            logger.info(f"Prompt loaded ({len(prompt_text)} characters)")
+            logger.debug(f"Prompt preview: {prompt_text[:100]}...")
         except ValidationError as e:
-            click.echo(f"Error: {e}", err=True)
+            logger.error(f"Prompt validation failed: {e}")
             sys.exit(1)
 
         # Validate inputs
         try:
+            logger.debug("Validating inputs...")
             if images:
                 validate_reference_images(list(images))
+                logger.debug(f"Reference images validated: {list(images)}")
             validate_aspect_ratio(aspect_ratio)
+            logger.debug(f"Aspect ratio validated: {aspect_ratio}")
             validate_model(model)
+            logger.debug(f"Model validated: {model}")
         except ValidationError as e:
-            click.echo(f"Error: {e}", err=True)
+            logger.error(f"Validation failed: {e}")
             sys.exit(1)
 
         # Create client
         try:
-            if verbose:
-                auth_method = "Vertex AI" if use_vertex else "Gemini Developer API"
-                click.echo(f"Authenticating with {auth_method}...", err=True)
+            auth_method = "Vertex AI" if use_vertex else "Gemini Developer API"
+            logger.info(f"Authenticating with {auth_method}...")
+            logger.debug(
+                f"Auth details: use_vertex={use_vertex}, project={project}, location={location}"
+            )
 
             client = create_client(
                 api_key=api_key,
@@ -209,14 +223,20 @@ def generate(
                 project=project,
                 location=location,
             )
+            logger.debug("Client created successfully")
         except AuthenticationError as e:
-            click.echo(f"Authentication Error: {e}", err=True)
+            logger.error(f"Authentication failed: {e}")
+            logger.debug("Authentication error details:", exc_info=True)
             sys.exit(1)
 
         # Generate image
         try:
-            if verbose:
-                click.echo("Generating image...", err=True)
+            logger.info("Starting image generation...")
+            logger.debug(
+                f"Generation parameters: prompt_length={len(prompt_text)}, "
+                f"aspect_ratio={aspect_ratio}, model={model}, "
+                f"reference_images={len(images) if images else 0}"
+            )
 
             result = generate_image(
                 client=client,
@@ -230,23 +250,22 @@ def generate(
             # Output JSON result to stdout
             click.echo(json.dumps(result, indent=2))
 
-            if verbose:
-                resolution = format_resolution(aspect_ratio)
-                click.echo(f"\nSuccess! Image saved to: {output}", err=True)
-                click.echo(f"Resolution: {resolution}", err=True)
-                click.echo(f"Tokens used: {result.get('token_count', 0)}", err=True)
+            # Log success details
+            resolution = format_resolution(aspect_ratio)
+            logger.info(f"Success! Image saved to: {output}")
+            logger.info(f"Resolution: {resolution}")
+            logger.info(f"Tokens used: {result.get('token_count', 0)}")
+            logger.debug(f"Full result: {result}")
 
         except GenerationError as e:
-            click.echo(f"Generation Error: {e}", err=True)
+            logger.error(f"Image generation failed: {e}")
+            logger.debug("Generation error details:", exc_info=True)
             sys.exit(1)
 
     except KeyboardInterrupt:
-        click.echo("\nOperation interrupted by user.", err=True)
+        logger.warning("Operation interrupted by user")
         sys.exit(130)
     except Exception as e:
-        click.echo(f"Unexpected error: {e}", err=True)
-        if verbose:
-            import traceback
-
-            click.echo(traceback.format_exc(), err=True)
+        logger.error(f"Unexpected error: {type(e).__name__}: {e}")
+        logger.debug("Full traceback:", exc_info=True)
         sys.exit(1)
