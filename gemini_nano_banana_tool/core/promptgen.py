@@ -23,7 +23,7 @@ def generate_prompt(
     template: str | None = None,
     category: str | None = None,
     style: str | None = None,
-    model: str = "gemini-3-pro-preview",
+    model: str = "gemini-2.5-flash",
 ) -> dict[str, Any]:
     """Generate detailed image prompt from simple description using LLM.
 
@@ -33,7 +33,7 @@ def generate_prompt(
         template: Template to use (photography, character, scene, food, abstract, logo)
         category: Category hint (overrides template detection)
         style: Style hint (photorealistic, watercolor, anime, etc.)
-        model: Gemini model to use for generation (default: gemini-3-pro-preview)
+        model: Gemini model to use for generation (default: gemini-2.5-flash)
 
     Returns:
         dict with keys:
@@ -100,7 +100,7 @@ Make the prompt detailed but concise (aim for 50-100 words).
             model=model,
             contents=system_prompt + "\n\n" + user_prompt,
             config=types.GenerateContentConfig(
-                temperature=1.0,  # Required for Gemini 3 Pro (causes empty responses if < 1.0)
+                temperature=1.0,  # Good balance for creative prompt generation
                 max_output_tokens=500,  # Enough for detailed prompts
             ),
         )
