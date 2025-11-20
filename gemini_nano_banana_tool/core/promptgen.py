@@ -22,7 +22,7 @@ def generate_prompt(
     template: str | None = None,
     category: str | None = None,
     style: str | None = None,
-    model: str = "gemini-2.0-flash-exp",
+    model: str = "gemini-3-pro",
 ) -> dict[str, Any]:
     """Generate detailed image prompt from simple description using LLM.
 
@@ -32,7 +32,7 @@ def generate_prompt(
         template: Template to use (photography, character, scene, food, abstract, logo)
         category: Category hint (overrides template detection)
         style: Style hint (photorealistic, watercolor, anime, etc.)
-        model: Gemini model to use for generation (default: gemini-2.0-flash-exp)
+        model: Gemini model to use for generation (default: gemini-3-pro)
 
     Returns:
         dict with keys:
@@ -56,7 +56,7 @@ def generate_prompt(
     detected_category = category or (detect_category(description) if not template else None)
 
     # Build system prompt with best practices
-    system_prompt = """You are an expert prompt engineer for Gemini 2.5 Flash Image (Nano Banana).
+    system_prompt = """You are an expert prompt engineer for image generation models.
 Transform simple descriptions into detailed, effective image generation prompts.
 
 Follow these principles:
