@@ -18,10 +18,14 @@ from gemini_nano_banana_tool.core.models import (
     ASPECT_RATIO_DESCRIPTIONS,
     ASPECT_RATIO_RESOLUTIONS,
     DEFAULT_MODEL,
+    DEFAULT_RESOLUTION,
     MAX_REFERENCE_IMAGES,
     MAX_REFERENCE_IMAGES_PER_MODEL,
     MODEL_DESCRIPTIONS,
+    MODELS_WITH_RESOLUTION_SUPPORT,
+    RESOLUTION_MULTIPLIERS,
     SUPPORTED_MODELS,
+    SUPPORTED_RESOLUTIONS,
     AspectRatio,
 )
 from gemini_nano_banana_tool.utils import (
@@ -56,6 +60,10 @@ __all__ = [
     "DEFAULT_MODEL",
     "MAX_REFERENCE_IMAGES",
     "MAX_REFERENCE_IMAGES_PER_MODEL",
+    "SUPPORTED_RESOLUTIONS",
+    "RESOLUTION_MULTIPLIERS",
+    "MODELS_WITH_RESOLUTION_SUPPORT",
+    "DEFAULT_RESOLUTION",
     # Utils
     "load_prompt",
     "validate_reference_images",

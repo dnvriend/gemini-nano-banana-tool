@@ -52,7 +52,7 @@ logger = get_logger(__name__)
     "images",
     multiple=True,
     type=click.Path(exists=True),
-    help="Reference image (max 3 for Flash, 6 for Pro model)",
+    help="Reference image (max 3 for Flash, 14 for Pro model)",
 )
 @click.option(
     "-a",
@@ -65,6 +65,12 @@ logger = get_logger(__name__)
     "--model",
     default=DEFAULT_MODEL,
     help=f"Gemini model (default: {DEFAULT_MODEL}). Use 'list-models' to see all options.",
+)
+@click.option(
+    "-r",
+    "--resolution",
+    type=click.Choice(["1K", "2K", "4K"], case_sensitive=True),
+    help="Image resolution quality (Pro only: 1K=default, 2K=2x, 4K=4x)",
 )
 @click.option(
     "--api-key",
@@ -100,6 +106,7 @@ def generate(
     images: tuple[str, ...],
     aspect_ratio: str,
     model: str,
+    resolution: str | None,
     api_key: str | None,
     use_vertex: bool,
     project: str | None,
