@@ -100,7 +100,7 @@ Make the prompt detailed but concise (aim for 50-100 words).
             model=model,
             contents=system_prompt + "\n\n" + user_prompt,
             config=types.GenerateContentConfig(
-                temperature=0.7,  # Some creativity but consistent
+                temperature=1.0,  # Required for Gemini 3 Pro (causes empty responses if < 1.0)
                 max_output_tokens=500,  # Enough for detailed prompts
             ),
         )
