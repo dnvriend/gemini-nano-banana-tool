@@ -159,47 +159,62 @@ gemini-nano-banana-tool generate "prompt" -o output.png \
 
 **Model**: `gemini-2.5-flash-image`
 
-**Approximate Pricing**:
-- **Cost per image**: $0.001 - $0.01 (1-10 images per cent)
-- **Volume discounts**: Available for high usage
+**Pricing Structure**:
+- **Rate**: $30.00 per 1 million output tokens
+- **Cost per token**: $0.00003
+- **Typical token usage**: ~1,290 tokens per image
+- **Cost per image**: **$0.039** (1,290 × $0.00003)
+- **Resolution**: Up to 1024×1024 pixels (fixed)
 - **Speed**: Fast (seconds per image)
 
 **Example Costs**:
 ```
-10 images   = $0.01 - $0.10
-100 images  = $0.10 - $1.00
-1,000 images = $1.00 - $10.00
-10,000 images = $10.00 - $100.00
+10 images    = $0.39
+100 images   = $3.90
+1,000 images = $39.00
+10,000 images = $390.00
 ```
 
 **Best For**:
-- Quick iterations
-- Prototyping
+- Quick iterations and prototyping
 - Cost-effective production
 - High-volume generation
+- Content that doesn't require maximum quality
 
 ### Paid Tier - Pro Model (3.0)
 
 **Model**: `gemini-3-pro-image-preview`
 
-**Approximate Pricing**:
-- **Cost per image**: $0.01 - $0.10 (10-100 images per dollar)
-- **Volume discounts**: Available for high usage
+**Pricing Structure**:
+- **Rate**: $120.00 per 1 million output tokens
+- **Cost per token**: $0.00012
+- **Resolution-based token usage**:
+  - **1K/2K** (1024×1024px to 2048×2048px): ~1,120 tokens → **$0.134 per image**
+  - **4K** (up to 4096×4096px): ~2,000 tokens → **$0.24 per image**
 - **Speed**: Slower (better quality)
 
-**Example Costs**:
+**Example Costs (1K/2K Resolution)**:
 ```
-10 images   = $0.10 - $1.00
-100 images  = $1.00 - $10.00
-1,000 images = $10.00 - $100.00
-10,000 images = $100.00 - $1,000.00
+10 images    = $1.34
+100 images   = $13.40
+1,000 images = $134.00
+10,000 images = $1,340.00
+```
+
+**Example Costs (4K Resolution)**:
+```
+10 images    = $2.40
+100 images   = $24.00
+1,000 images = $240.00
+10,000 images = $2,400.00
 ```
 
 **Best For**:
-- Professional projects
+- Professional asset production
 - High-quality requirements
-- Complex scenes
-- Text accuracy critical
+- Complex scenes with fine details
+- Projects requiring Google Search grounding
+- Text accuracy critical applications
 
 ### Vertex AI Pricing
 

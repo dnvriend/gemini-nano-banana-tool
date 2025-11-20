@@ -609,6 +609,7 @@ result = generate_image(
 print(f"Generated: {result['output_path']}")
 print(f"Resolution: {result['resolution']}")
 print(f"Tokens used: {result['token_count']}")
+print(f"Estimated cost: ${result['estimated_cost_usd']:.4f}")
 
 # Generate with reference images
 result = generate_image(
@@ -667,9 +668,51 @@ vertex_client = create_client(
 )
 ```
 
+## Pricing & Cost Tracking
+
+All image generation responses automatically include **estimated cost** in USD based on actual token usage.
+
+### Pricing Structure
+
+**Flash Model (gemini-2.5-flash-image)**:
+- $30 per 1M output tokens = **$0.00003 per token**
+- Typical: ~1,290 tokens/image = **~$0.039 per image**
+- Resolution: Fixed ~1024p
+
+**Pro Model (gemini-3-pro-image-preview)**:
+- $120 per 1M output tokens = **$0.00012 per token**
+- **1K/2K**: ~1,120 tokens/image = **~$0.134 per image**
+- **4K**: ~2,000 tokens/image = **~$0.24 per image**
+- Resolution: Variable 1K/2K/4K
+
+### Cost in JSON Output
+
+Every generation includes `estimated_cost_usd` calculated from actual token usage:
+
+```json
+{
+  "output_path": "image.png",
+  "model": "gemini-2.5-flash-image",
+  "token_count": 1295,
+  "estimated_cost_usd": 0.0389,
+  ...
+}
+```
+
+### Cost Examples
+
+| Volume | Flash Cost | Pro 1K/2K Cost | Pro 4K Cost |
+|--------|------------|----------------|-------------|
+| 10 images | $0.39 | $1.34 | $2.40 |
+| 100 images | $3.90 | $13.40 | $24.00 |
+| 1,000 images | $39.00 | $134.00 | $240.00 |
+
+For detailed pricing information, see [references/api-setup-pricing.md](references/api-setup-pricing.md).
+
 ## Resources
 
 - **Official Documentation**: [Gemini Image Generation Guide](https://ai.google.dev/gemini-api/docs/image-generation)
+- **Official Pricing**: [Google AI Pricing](https://ai.google.dev/pricing)
 - **Google AI Studio**: [Get API Key](https://aistudio.google.com/app/apikey)
 - **Python SDK**: [google-genai](https://pypi.org/project/google-genai/)
 - **Vertex AI**: [Setup Guide](https://cloud.google.com/vertex-ai/docs/start/introduction-unified-platform)

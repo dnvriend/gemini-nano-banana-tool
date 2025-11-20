@@ -13,6 +13,7 @@ from google.genai import types
 
 from gemini_nano_banana_tool.core.models import (
     ASPECT_RATIO_RESOLUTIONS,
+    COST_PER_TOKEN,
     DEFAULT_MODEL,
     DEFAULT_RESOLUTION,
     MODELS_WITH_RESOLUTION_SUPPORT,
@@ -54,8 +55,10 @@ def generate_image(
             - model: Model used
             - aspect_ratio: Aspect ratio used
             - resolution: Resolution string (e.g., "1344x768")
+            - resolution_quality: Resolution quality level (1K/2K/4K)
             - reference_image_count: Number of reference images provided
             - token_count: Total tokens used
+            - estimated_cost_usd: Estimated cost in USD based on token usage
             - metadata: Additional generation metadata
 
     Raises:
@@ -222,6 +225,13 @@ def generate_image(
             token_count = getattr(response.usage_metadata, "total_token_count", 0)
         logger.debug(f"Token usage: {token_count}")
 
+        # Calculate cost based on token usage
+        cost_per_token = COST_PER_TOKEN.get(model, 0.0)
+        estimated_cost = token_count * cost_per_token if token_count > 0 else 0.0
+        logger.debug(
+            f"Cost calculation: {token_count} tokens × ${cost_per_token} = ${estimated_cost:.4f}"
+        )
+
         # Format resolution
         width, height = ASPECT_RATIO_RESOLUTIONS.get(aspect_ratio, (0, 0))
         resolution_str = f"{width}x{height}"
@@ -236,6 +246,7 @@ def generate_image(
             "resolution_quality": effective_resolution or DEFAULT_RESOLUTION,
             "reference_image_count": len(reference_images) if reference_images else 0,
             "token_count": token_count,
+            "estimated_cost_usd": round(estimated_cost, 4),
             "metadata": {
                 "finish_reason": getattr(candidate, "finish_reason", "UNKNOWN"),
                 "safety_ratings": getattr(candidate, "safety_ratings", None),

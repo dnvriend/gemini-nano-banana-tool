@@ -129,6 +129,12 @@ SUPPORTED_MODELS: list[str] = [
 ]
 
 DEFAULT_MODEL = "gemini-2.5-flash-image"
+
+# Pricing per output token (USD)
+COST_PER_TOKEN: dict[str, float] = {
+    "gemini-2.5-flash-image": 0.00003,  # $30 per 1M tokens
+    "gemini-3-pro-image-preview": 0.00012,  # $120 per 1M tokens
+}
 ```
 
 ### core/generator.py
@@ -144,12 +150,14 @@ def generate_image(
     reference_images: list[str] | None = None,
     aspect_ratio: str = "1:1",
     model: str = DEFAULT_MODEL,
+    resolution: str | None = None,
 ) -> dict[str, Any]:
     """Generate image from prompt and optional reference images.
 
     Returns:
         dict with keys: output_path, model, aspect_ratio, resolution,
-        reference_image_count, token_count, metadata
+        resolution_quality, reference_image_count, token_count,
+        estimated_cost_usd, metadata
 
     Raises:
         GenerationError: If image generation fails

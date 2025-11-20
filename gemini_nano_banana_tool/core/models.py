@@ -98,3 +98,17 @@ MODELS_WITH_RESOLUTION_SUPPORT: list[str] = [
 
 # Default resolution for Pro model
 DEFAULT_RESOLUTION = "1K"
+
+# Pricing per output token (USD)
+# Source: https://ai.google.dev/pricing
+# Flash: $30/1M tokens = $0.00003 per token
+# Pro: $120/1M tokens = $0.00012 per token
+COST_PER_TOKEN: dict[str, float] = {
+    "gemini-2.5-flash-image": 0.00003,  # $30 per 1M tokens
+    "gemini-3-pro-image-preview": 0.00012,  # $120 per 1M tokens
+}
+
+# Example costs per image based on typical token usage:
+# Flash: 1,290 tokens × $0.00003 = ~$0.039 per image
+# Pro 1K/2K: 1,120 tokens × $0.00012 = ~$0.134 per image
+# Pro 4K: 2,000 tokens × $0.00012 = ~$0.24 per image
