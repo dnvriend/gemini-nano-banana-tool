@@ -1,0 +1,45 @@
+{
+  "name": "gemini-nano-banana-tool",
+  "displayName": "Gemini Nano Banana",
+  "version": "2.0.0",
+  "description": "Generate images using Google Gemini with AI prompt optimization, cost tracking, and multi-turn conversations",
+  "commands": [
+    {
+      "name": "promptgen",
+      "description": "Transform simple descriptions into detailed, optimized prompts using AI",
+      "file": "./commands/promptgen.md"
+    },
+    {
+      "name": "generate",
+      "description": "Generate images from text prompts with optional reference images",
+      "file": "./commands/generate.md"
+    },
+    {
+      "name": "generate-conversation",
+      "description": "Multi-turn image generation with progressive refinement",
+      "file": "./commands/generate-conversation.md"
+    },
+    {
+      "name": "list-models",
+      "description": "List available Gemini image generation models",
+      "file": "./commands/list-models.md"
+    },
+    {
+      "name": "list-aspect-ratios",
+      "description": "List supported aspect ratios with resolutions",
+      "file": "./commands/list-aspect-ratios.md"
+    },
+    {
+      "name": "completion",
+      "description": "Generate shell completion scripts for bash, zsh, or fish",
+      "file": "./commands/completion.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "gemini-nano-banana-tool",
+      "description": "AI image generation, prompt optimization, cost tracking",
+      "file": "./skills/gemini-nano-banana-tool/SKILL.md"
+    }
+  ]
+}
