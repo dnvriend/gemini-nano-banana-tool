@@ -1,40 +1,19 @@
 {
   "name": "gemini-nano-banana-tool",
-  "displayName": "Gemini Nano Banana",
-  "version": "2.0.0",
-  "description": "Professional CLI for Google Gemini image generation with AI-powered prompt optimization",
-  "author": "Dennis Vriend",
-  "homepage": "https://github.com/dnvriend/gemini-nano-banana-tool",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/dnvriend/gemini-nano-banana-tool.git"
+  "owner": {
+    "name": "Dennis Vriend",
+    "email": "dvriend@ilionx.com",
+    "url": "https://github.com/dnvriend/gemini-nano-banana-tool"
   },
-  "license": "MIT",
-  "keywords": [
-    "gemini",
-    "image-generation",
-    "google-ai",
-    "nano-banana",
-    "prompt-optimization",
-    "ai-images",
-    "text-to-image",
-    "image-editing",
-    "google-genai",
-    "cli-tool"
-  ],
-  "categories": [
-    "AI & ML",
-    "Image Generation",
-    "Productivity"
-  ],
-  "requirements": {
-    "python": ">=3.14",
-    "uv": true
+  "metadata": {
+    "description": "Marketplace for gemini-nano-banana-tool",
+    "version": "2.0.0"
   },
   "plugins": [
     {
       "name": "gemini-nano-banana-tool",
-      "path": "./plugins/gemini-nano-banana-tool"
+      "source": "./plugins/gemini-nano-banana-tool",
+      "description": "gemini-nano-banana-tool-plugin"
     }
   ]
 }
