@@ -21,9 +21,12 @@ from gemini_nano_banana_tool.commands import (
 def main(ctx: click.Context) -> None:
     """Gemini Nano Banana Tool - Professional AI image generation CLI.
 
-    Generate, edit, and manipulate images using Google's Gemini 2.5 Flash Image model
-    (codename "Nano Banana"). Create high-quality images from text prompts, edit existing
-    images with natural language, and compose multiple images together.
+    Generate, edit, and manipulate images using Google's Gemini image generation models:
+    • Nano Banana (gemini-2.5-flash-image) - Fast, high-quality generation
+    • Nano Banana 2 (gemini-3-pro-image-preview) - Advanced pro model with higher quality
+
+    Create high-quality images from text prompts, edit existing images with natural
+    language, and compose multiple images together.
 
     \b
     Key Features:

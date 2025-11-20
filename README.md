@@ -13,7 +13,7 @@
 [![Claude Sonnet 4.5](https://img.shields.io/badge/Model-Claude_Sonnet_4.5-blue)](https://www.anthropic.com/claude)
 [![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code-5A67D8.svg)](https://www.anthropic.com/claude/code)
 
-**Gemini Nano Banana Tool** - Professional CLI for generating, editing, and manipulating images using Google's Gemini 2.5 Flash Image model
+**Gemini Nano Banana Tool** - Professional CLI for generating, editing, and manipulating images using Google's Gemini image generation models (Nano Banana & Nano Banana 2)
 
 </div>
 
@@ -40,7 +40,12 @@
 
 ### What is Nano Banana?
 
-**Gemini 2.5 Flash Image** (codename "Nano Banana") is Google's latest AI image generation model that provides:
+Google's Gemini image generation models come in two flavors:
+
+**Nano Banana (gemini-2.5-flash-image)** - Fast, high-quality image generation
+**Nano Banana 2 (gemini-3-pro-image-preview)** - Advanced pro model with higher quality and more features
+
+Both models provide:
 
 - 🎨 High-quality text-to-image generation
 - 🖼️ Image editing with natural language prompts
