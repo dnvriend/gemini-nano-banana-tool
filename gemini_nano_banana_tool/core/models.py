@@ -107,7 +107,7 @@ DEFAULT_RESOLUTION = "1K"
 COST_PER_TOKEN: dict[str, float] = {
     "gemini-2.5-flash-image": 0.00003,  # $30 per 1M tokens
     "gemini-3-pro-image-preview": 0.00012,  # $120 per 1M tokens
-    "gemini-3-pro": 0.000012,  # $12 per 1M tokens (text generation)
+    "gemini-3-pro-preview": 0.000012,  # $12 per 1M tokens (text generation)
 }
 
 # Example costs per image based on typical token usage:

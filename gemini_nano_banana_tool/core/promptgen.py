@@ -23,7 +23,7 @@ def generate_prompt(
     template: str | None = None,
     category: str | None = None,
     style: str | None = None,
-    model: str = "gemini-3-pro",
+    model: str = "gemini-3-pro-preview",
 ) -> dict[str, Any]:
     """Generate detailed image prompt from simple description using LLM.
 
@@ -33,7 +33,7 @@ def generate_prompt(
         template: Template to use (photography, character, scene, food, abstract, logo)
         category: Category hint (overrides template detection)
         style: Style hint (photorealistic, watercolor, anime, etc.)
-        model: Gemini model to use for generation (default: gemini-3-pro)
+        model: Gemini model to use for generation (default: gemini-3-pro-preview)
 
     Returns:
         dict with keys:

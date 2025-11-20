@@ -79,8 +79,8 @@ from gemini_nano_banana_tool.core.promptgen import (
 @click.option(
     "-m",
     "--model",
-    default="gemini-3-pro",
-    help="LLM model for generation (default: gemini-3-pro)",
+    default="gemini-3-pro-preview",
+    help="LLM model for generation (default: gemini-3-pro-preview)",
 )
 @click.option(
     "--api-key",
@@ -122,7 +122,7 @@ def promptgen(
     """Generate detailed image prompts from simple descriptions.
 
     Transform basic descriptions into detailed, effective prompts using
-    Gemini 3 Pro for enhanced prompt engineering.
+    Gemini 3 Pro Preview for enhanced prompt engineering.
 
     \b
     Examples:
