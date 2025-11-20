@@ -3,6 +3,8 @@
 <div align="center">
   <img src=".github/assets/logo.png" alt="gemini-nano-banana-tool" width="200" />
   <br>
+  <em>Logo generated with Gemini Pro model (~$0.22 USD)</em>
+  <br>
   <br>
 
 [![Python Version](https://img.shields.io/badge/python-3.14+-blue.svg)](https://www.python.org/downloads/)
