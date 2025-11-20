@@ -19,9 +19,21 @@ typecheck: ## Run type checking with mypy
 test: ## Run tests
 	uv run pytest tests/
 
-check: lint typecheck test ## Run all checks (lint, typecheck, test)
+security-bandit: ## Run bandit security linter
+	uv run bandit -r gemini_nano_banana_tool -c pyproject.toml
 
-pipeline: format lint typecheck test build install-global ## Run full pipeline (format, lint, typecheck, test, build, install-global)
+security-pip-audit: ## Run pip-audit for dependency vulnerabilities
+	uv run pip-audit
+
+security-gitleaks: ## Run gitleaks secret scanner
+	@command -v gitleaks >/dev/null 2>&1 || { echo "❌ gitleaks not found. Install: brew install gitleaks"; exit 1; }
+	gitleaks detect --source . --config .gitleaks.toml --verbose
+
+security: security-bandit security-pip-audit security-gitleaks ## Run all security checks
+
+check: lint typecheck test security ## Run all checks (lint, typecheck, test, security)
+
+pipeline: format lint typecheck test security build install-global ## Run full pipeline (format, lint, typecheck, test, security, build, install-global)
 
 clean: ## Remove build artifacts and cache
 	rm -rf build/ dist/ *.egg-info .pytest_cache .mypy_cache .ruff_cache

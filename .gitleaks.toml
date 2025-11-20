@@ -1,0 +1,26 @@
+# Gitleaks configuration for gemini-nano-banana-tool
+# See: https://github.com/gitleaks/gitleaks
+
+title = "gitleaks config for gemini-nano-banana-tool"
+
+[extend]
+# Use default gitleaks rules
+useDefault = true
+
+[allowlist]
+description = "Allowlist for false positives"
+
+# Allow common test fixtures and example values
+regexes = [
+    '''(example|test|mock|dummy|fake)[-_]?(key|token|secret|password)''',
+    '''EXAMPLE_[A-Z_]+''',
+    '''test[_-]?[a-zA-Z0-9]+''',
+]
+
+# Ignore common false positive files
+paths = [
+    '''(.*)?/tests/.*''',
+    '''(.*)?\.md$''',
+    '''(.*)?\.txt$''',
+    '''\.gitleaks\.toml''',
+]
