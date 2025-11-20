@@ -16,7 +16,7 @@ from gemini_nano_banana_tool.commands import (
 
 
 @click.group()
-@click.version_option(version="1.0.0")
+@click.version_option(version="2.0.0")
 @click.pass_context
 def main(ctx: click.Context) -> None:
     """Gemini Nano Banana Tool - Professional AI image generation CLI.
