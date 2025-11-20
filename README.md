@@ -42,14 +42,14 @@
 
 Google's Gemini image generation models come in two flavors:
 
-**Nano Banana (gemini-2.5-flash-image)** - Fast, high-quality image generation
-**Nano Banana 2 (gemini-3-pro-image-preview)** - Advanced pro model with higher quality and more features
+**Nano Banana (gemini-2.5-flash-image)** - Fast, high-quality image generation (up to 3 reference images)
+**Nano Banana 2 (gemini-3-pro-image-preview)** - Advanced pro model with higher quality and more features (up to 6 reference images)
 
 Both models provide:
 
 - 🎨 High-quality text-to-image generation
 - 🖼️ Image editing with natural language prompts
-- 🔄 Multi-image composition (up to 3 reference images)
+- 🔄 Multi-image composition (3 images for Flash, 6 images for Pro)
 - 📐 Multiple aspect ratios (1:1, 16:9, 9:16, and more)
 - 🎭 Style transfer and artistic rendering
 - ✨ Built-in SynthID watermarking for authenticity

@@ -82,16 +82,24 @@ def test_validate_reference_images_valid() -> None:
     """Test validating valid reference images."""
     # Create temp files
     temp_files = []
-    for i in range(3):
+    for i in range(6):
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
         temp_file.close()
         temp_files.append(temp_file.name)
 
     try:
-        # Should not raise for 1, 2, or 3 images
-        validate_reference_images([temp_files[0]])
-        validate_reference_images(temp_files[:2])
-        validate_reference_images(temp_files)
+        # Flash model: should not raise for 1, 2, or 3 images
+        validate_reference_images([temp_files[0]], "gemini-2.5-flash-image")
+        validate_reference_images(temp_files[:2], "gemini-2.5-flash-image")
+        validate_reference_images(temp_files[:3], "gemini-2.5-flash-image")
+
+        # Pro model: should not raise for 1-6 images
+        validate_reference_images([temp_files[0]], "gemini-3-pro-image-preview")
+        validate_reference_images(temp_files[:3], "gemini-3-pro-image-preview")
+        validate_reference_images(temp_files[:6], "gemini-3-pro-image-preview")
+
+        # Default (no model specified): should use flash limit (3)
+        validate_reference_images(temp_files[:3])
     finally:
         for temp_file in temp_files:
             os.unlink(temp_file)
@@ -99,16 +107,25 @@ def test_validate_reference_images_valid() -> None:
 
 def test_validate_reference_images_too_many() -> None:
     """Test validating too many reference images."""
-    # Create 4 temp files
+    # Create 7 temp files
     temp_files = []
-    for i in range(4):
+    for i in range(7):
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
         temp_file.close()
         temp_files.append(temp_file.name)
 
     try:
+        # Flash model: 4 images should fail (max 3)
         with pytest.raises(ValidationError, match="Too many reference images"):
-            validate_reference_images(temp_files)
+            validate_reference_images(temp_files[:4], "gemini-2.5-flash-image")
+
+        # Pro model: 7 images should fail (max 6)
+        with pytest.raises(ValidationError, match="Too many reference images"):
+            validate_reference_images(temp_files, "gemini-3-pro-image-preview")
+
+        # Default (no model): 4 images should fail (uses flash limit)
+        with pytest.raises(ValidationError, match="Too many reference images"):
+            validate_reference_images(temp_files[:4])
     finally:
         for temp_file in temp_files:
             os.unlink(temp_file)

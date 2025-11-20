@@ -65,5 +65,11 @@ MODEL_DESCRIPTIONS: dict[str, str] = {
 # Default model
 DEFAULT_MODEL = "gemini-2.5-flash-image"
 
-# Maximum number of reference images
+# Maximum number of reference images per model
+MAX_REFERENCE_IMAGES_PER_MODEL: dict[str, int] = {
+    "gemini-2.5-flash-image": 3,
+    "gemini-3-pro-image-preview": 6,
+}
+
+# Legacy constant for backward compatibility (uses flash model limit)
 MAX_REFERENCE_IMAGES = 3

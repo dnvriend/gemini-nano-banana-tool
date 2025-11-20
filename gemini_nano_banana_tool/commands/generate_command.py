@@ -52,7 +52,7 @@ logger = get_logger(__name__)
     "images",
     multiple=True,
     type=click.Path(exists=True),
-    help="Reference image (can be used up to 3 times)",
+    help="Reference image (max 3 for Flash, 6 for Pro model)",
 )
 @click.option(
     "-a",
@@ -198,13 +198,13 @@ def generate(
         # Validate inputs
         try:
             logger.debug("Validating inputs...")
+            validate_model(model)
+            logger.debug(f"Model validated: {model}")
             if images:
-                validate_reference_images(list(images))
+                validate_reference_images(list(images), model)
                 logger.debug(f"Reference images validated: {list(images)}")
             validate_aspect_ratio(aspect_ratio)
             logger.debug(f"Aspect ratio validated: {aspect_ratio}")
-            validate_model(model)
-            logger.debug(f"Model validated: {model}")
         except ValidationError as e:
             logger.error(f"Validation failed: {e}")
             sys.exit(1)

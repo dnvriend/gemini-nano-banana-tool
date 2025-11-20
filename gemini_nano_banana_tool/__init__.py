@@ -19,6 +19,7 @@ from gemini_nano_banana_tool.core.models import (
     ASPECT_RATIO_RESOLUTIONS,
     DEFAULT_MODEL,
     MAX_REFERENCE_IMAGES,
+    MAX_REFERENCE_IMAGES_PER_MODEL,
     MODEL_DESCRIPTIONS,
     SUPPORTED_MODELS,
     AspectRatio,
@@ -54,6 +55,7 @@ __all__ = [
     "MODEL_DESCRIPTIONS",
     "DEFAULT_MODEL",
     "MAX_REFERENCE_IMAGES",
+    "MAX_REFERENCE_IMAGES_PER_MODEL",
     # Utils
     "load_prompt",
     "validate_reference_images",

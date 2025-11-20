@@ -11,7 +11,6 @@ from pathlib import Path
 
 from gemini_nano_banana_tool.core.models import (
     ASPECT_RATIO_RESOLUTIONS,
-    MAX_REFERENCE_IMAGES,
     SUPPORTED_MODELS,
 )
 
@@ -117,25 +116,39 @@ def load_prompt(
     raise ValidationError("Internal error: no prompt source handled")
 
 
-def validate_reference_images(image_paths: list[str]) -> None:
-    """Validate reference images (max 3, all exist).
+def validate_reference_images(image_paths: list[str], model: str | None = None) -> None:
+    """Validate reference images based on model limits (all must exist).
 
     Args:
         image_paths: List of image file paths
+        model: Gemini model name (determines max images: flash=3, pro=6)
 
     Raises:
         ValidationError: If validation fails
 
     Example:
-        >>> validate_reference_images(["img1.jpg", "img2.jpg"])
-        >>> # Raises ValidationError if more than 3 images or any don't exist
+        >>> validate_reference_images(["img1.jpg", "img2.jpg"], "gemini-2.5-flash-image")
+        >>> # Raises ValidationError if too many images or any don't exist
     """
-    logger.debug(f"Validating {len(image_paths)} reference images")
-    if len(image_paths) > MAX_REFERENCE_IMAGES:
-        logger.error(f"Too many reference images: {len(image_paths)} > {MAX_REFERENCE_IMAGES}")
+    from gemini_nano_banana_tool.core.models import (
+        DEFAULT_MODEL,
+        MAX_REFERENCE_IMAGES_PER_MODEL,
+    )
+
+    # Determine max images for the model
+    model_to_use = model or DEFAULT_MODEL
+    max_images = MAX_REFERENCE_IMAGES_PER_MODEL.get(model_to_use, 3)
+
+    logger.debug(
+        f"Validating {len(image_paths)} reference images "
+        f"for model {model_to_use} (max={max_images})"
+    )
+
+    if len(image_paths) > max_images:
+        logger.error(f"Too many reference images: {len(image_paths)} > {max_images}")
         raise ValidationError(
             f"Too many reference images: {len(image_paths)}. "
-            f"Maximum allowed is {MAX_REFERENCE_IMAGES}. "
+            f"Maximum allowed for {model_to_use} is {max_images}. "
             f"Provided: {', '.join(image_paths)}"
         )
 
