@@ -14,6 +14,8 @@ from google.genai import types
 from gemini_nano_banana_tool.core.models import (
     ASPECT_RATIO_RESOLUTIONS,
     DEFAULT_MODEL,
+    DEFAULT_RESOLUTION,
+    MODELS_WITH_RESOLUTION_SUPPORT,
 )
 from gemini_nano_banana_tool.utils import save_image
 
@@ -33,6 +35,7 @@ def generate_image(
     reference_images: list[str] | None = None,
     aspect_ratio: str = "1:1",
     model: str = DEFAULT_MODEL,
+    resolution: str | None = None,
 ) -> dict[str, Any]:
     """Generate image from prompt and optional reference images.
 
@@ -40,9 +43,10 @@ def generate_image(
         client: Configured Gemini client
         prompt: Text prompt for image generation
         output_path: Path to save generated image
-        reference_images: Optional list of reference image paths (max 3)
+        reference_images: Optional list of reference image paths (max 3 Flash, 14 Pro)
         aspect_ratio: Aspect ratio (e.g., "16:9")
         model: Gemini model to use
+        resolution: Resolution quality for Pro model (1K/2K/4K), ignored for Flash
 
     Returns:
         dict with keys:
@@ -72,6 +76,7 @@ def generate_image(
     try:
         logger.debug(
             f"Starting image generation: model={model}, aspect_ratio={aspect_ratio}, "
+            f"resolution={resolution or 'default'}, "
             f"reference_images={len(reference_images) if reference_images else 0}"
         )
         logger.debug(f"Prompt length: {len(prompt)} characters")
@@ -119,13 +124,34 @@ def generate_image(
         logger.debug("Adding text prompt to request")
         contents.append(types.Part(text=prompt))
 
-        # Configure generation with aspect ratio
-        logger.debug(f"Configuring generation: aspect_ratio={aspect_ratio}")
+        # Configure generation with aspect ratio and resolution
+        # Determine effective resolution to use
+        effective_resolution = None
+        if resolution and model in MODELS_WITH_RESOLUTION_SUPPORT:
+            effective_resolution = resolution
+            logger.debug(
+                f"Configuring generation: aspect_ratio={aspect_ratio}, resolution={resolution}"
+            )
+        else:
+            if resolution and model not in MODELS_WITH_RESOLUTION_SUPPORT:
+                logger.warning(
+                    f"Resolution '{resolution}' ignored for model '{model}' "
+                    f"(only Pro model supports variable resolution)"
+                )
+            logger.debug(
+                f"Configuring generation: aspect_ratio={aspect_ratio}, resolution=default (~1024p)"
+            )
+
+        # Build image config
+        image_config_params: dict[str, Any] = {"aspect_ratio": aspect_ratio}
+        if effective_resolution:
+            # Pro model: add image_size parameter
+            image_config_params["image_size"] = effective_resolution
+            logger.debug(f"Using image_size={effective_resolution} for Pro model")
+
         config = types.GenerateContentConfig(
             response_modalities=["IMAGE"],
-            image_config=types.ImageConfig(
-                aspect_ratio=aspect_ratio,
-            ),
+            image_config=types.ImageConfig(**image_config_params),
         )
 
         # Generate content
@@ -198,15 +224,16 @@ def generate_image(
 
         # Format resolution
         width, height = ASPECT_RATIO_RESOLUTIONS.get(aspect_ratio, (0, 0))
-        resolution = f"{width}x{height}"
-        logger.debug(f"Image resolution: {resolution}")
+        resolution_str = f"{width}x{height}"
+        logger.debug(f"Image resolution: {resolution_str}")
 
         # Build result
         result = {
             "output_path": output_path,
             "model": model,
             "aspect_ratio": aspect_ratio,
-            "resolution": resolution,
+            "resolution": resolution_str,
+            "resolution_quality": effective_resolution or DEFAULT_RESOLUTION,
             "reference_image_count": len(reference_images) if reference_images else 0,
             "token_count": token_count,
             "metadata": {

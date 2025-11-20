@@ -210,6 +210,45 @@ def validate_model(model: str) -> None:
         )
 
 
+def validate_resolution(resolution: str | None, model: str) -> None:
+    """Validate resolution is supported for the given model.
+
+    Args:
+        resolution: Resolution quality level (1K, 2K, 4K) or None
+        model: Model name
+
+    Raises:
+        ValidationError: If resolution is not supported or used with wrong model
+
+    Example:
+        >>> validate_resolution("4K", "gemini-3-pro-image-preview")
+        >>> # Raises ValidationError if resolution used with Flash model
+    """
+    from gemini_nano_banana_tool.core.models import (
+        MODELS_WITH_RESOLUTION_SUPPORT,
+        SUPPORTED_RESOLUTIONS,
+    )
+
+    if resolution is None:
+        return  # No resolution specified is always valid
+
+    # Check if resolution value is valid
+    if resolution not in SUPPORTED_RESOLUTIONS:
+        supported = ", ".join(SUPPORTED_RESOLUTIONS)
+        raise ValidationError(
+            f"Unsupported resolution: {resolution}. "
+            f"Supported resolutions: {supported}. "
+            f"Use 1K (default), 2K (2x scale), or 4K (4x scale)."
+        )
+
+    # Check if model supports resolution
+    if model not in MODELS_WITH_RESOLUTION_SUPPORT:
+        logger.warning(
+            f"Resolution '{resolution}' specified but model '{model}' only supports fixed ~1024p. "
+            f"Resolution parameter will be ignored. Use Pro model for variable resolution."
+        )
+
+
 def save_image(image_data: bytes, output_path: str) -> None:
     """Save image bytes to file.
 

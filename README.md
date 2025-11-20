@@ -42,15 +42,16 @@
 
 Google's Gemini image generation models come in two flavors:
 
-**Nano Banana (gemini-2.5-flash-image)** - Fast, high-quality image generation (up to 3 reference images)
-**Nano Banana 2 (gemini-3-pro-image-preview)** - Advanced pro model with higher quality and more features (up to 6 reference images)
+**Nano Banana (gemini-2.5-flash-image)** - Fast image generation with fixed ~1024p resolution (up to 3 reference images)
+**Nano Banana 2 (gemini-3-pro-image-preview)** - Advanced pro model with 1K/2K/4K resolution support (up to 14 reference images)
 
 Both models provide:
 
 - 🎨 High-quality text-to-image generation
 - 🖼️ Image editing with natural language prompts
-- 🔄 Multi-image composition (3 images for Flash, 6 images for Pro)
+- 🔄 Multi-image composition (3 images for Flash, 14 images for Pro)
 - 📐 Multiple aspect ratios (1:1, 16:9, 9:16, and more)
+- 🎯 Variable resolution (Pro model: 1K/2K/4K quality levels)
 - 🎭 Style transfer and artistic rendering
 - ✨ Built-in SynthID watermarking for authenticity
 
@@ -83,8 +84,9 @@ This tool provides a **professional, agent-friendly CLI** for Gemini image gener
 - ✅ **Prompt Templates** - 6 specialized templates (photography, character, scene, food, abstract, logo)
 - ✅ **Text-to-Image Generation** - Create images from detailed text prompts
 - ✅ **Multi-turn Conversations** - Progressive image refinement through conversational turns
-- ✅ **Image Editing** - Edit existing images with up to 3 reference images
+- ✅ **Image Editing** - Edit existing images (3 ref images for Flash, 14 for Pro)
 - ✅ **Multiple Aspect Ratios** - Support for 10 different aspect ratios
+- ✅ **Variable Resolution** - Pro model supports 1K/2K/4K quality levels
 - ✅ **Flexible Prompt Input** - From argument, file, or stdin
 - ✅ **Model Selection** - Choose from multiple Gemini models
 - ✅ **Dual Authentication** - Supports both Gemini API key and Vertex AI
@@ -321,15 +323,42 @@ gemini-nano-banana-tool generate "test" -o output.png -vvv
 #### Model Selection
 
 ```bash
-# Use default model (fast, high-quality)
+# Use default model (fast, high-quality, fixed ~1024p)
 gemini-nano-banana-tool generate "Your prompt" -o output.png
 
-# Use advanced model (higher quality, more features)
+# Use advanced model (higher quality, variable resolution, more features)
 gemini-nano-banana-tool generate "Your prompt" -o output.png \
   --model gemini-3-pro-image-preview
 
 # Default model is gemini-2.5-flash-image
 ```
+
+#### Resolution Quality (Pro Model Only)
+
+The Pro model (`gemini-3-pro-image-preview`) supports variable resolution quality:
+
+```bash
+# Default 1K resolution (~1024p)
+gemini-nano-banana-tool generate "Your prompt" -o output.png \
+  --model gemini-3-pro-image-preview
+
+# 2K resolution (2x scale, higher quality)
+gemini-nano-banana-tool generate "Your prompt" -o output.png \
+  --model gemini-3-pro-image-preview \
+  --resolution 2K
+
+# 4K resolution (4x scale, maximum quality)
+gemini-nano-banana-tool generate "Your prompt" -o output.png \
+  --model gemini-3-pro-image-preview \
+  --resolution 4K
+
+# Note: Flash model ignores --resolution (fixed ~1024p)
+```
+
+**Resolution Scale Guide:**
+- **1K** (default) - Standard quality, ~1024p base resolution
+- **2K** - 2x scale, approximately 2048p (higher quality, more tokens)
+- **4K** - 4x scale, approximately 4096p (maximum quality, most tokens)
 
 #### Complete Options
 
@@ -343,9 +372,10 @@ Options:
   -o, --output PATH              Output image file path [required]
   -f, --prompt-file PATH         Read prompt from file
   -s, --stdin                    Read prompt from stdin
-  -i, --image PATH               Reference image (can be used up to 3 times)
+  -i, --image PATH               Reference image (max 3 for Flash, 14 for Pro)
   -a, --aspect-ratio TEXT        Aspect ratio (default: 1:1)
   -m, --model TEXT               Gemini model (default: gemini-2.5-flash-image)
+  -r, --resolution TEXT          Resolution quality (Pro only: 1K/2K/4K)
   --api-key TEXT                 Override API key from environment
   --use-vertex                   Use Vertex AI instead of Developer API
   --project TEXT                 Google Cloud project (for Vertex AI)
@@ -587,6 +617,16 @@ result = generate_image(
     output_path="edited.png",
     reference_images=["original.jpg"],
     aspect_ratio=AspectRatio.RATIO_1_1
+)
+
+# Generate with Pro model and 4K resolution
+result = generate_image(
+    client=client,
+    prompt="Professional product photography",
+    output_path="product-4k.png",
+    aspect_ratio=AspectRatio.RATIO_16_9,
+    model="gemini-3-pro-image-preview",
+    resolution="4K"
 )
 ```
 

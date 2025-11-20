@@ -36,6 +36,7 @@ from gemini_nano_banana_tool.utils import (
     validate_aspect_ratio,
     validate_model,
     validate_reference_images,
+    validate_resolution,
 )
 
 __version__ = "2.0.0"
@@ -69,6 +70,7 @@ __all__ = [
     "validate_reference_images",
     "validate_aspect_ratio",
     "validate_model",
+    "validate_resolution",
     "save_image",
     "format_resolution",
     "ValidationError",

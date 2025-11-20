@@ -20,6 +20,7 @@ from gemini_nano_banana_tool.utils import (
     validate_aspect_ratio,
     validate_model,
     validate_reference_images,
+    validate_resolution,
 )
 
 logger = get_logger(__name__)
@@ -212,6 +213,9 @@ def generate(
                 logger.debug(f"Reference images validated: {list(images)}")
             validate_aspect_ratio(aspect_ratio)
             logger.debug(f"Aspect ratio validated: {aspect_ratio}")
+            validate_resolution(resolution, model)
+            if resolution:
+                logger.debug(f"Resolution validated: {resolution}")
         except ValidationError as e:
             logger.error(f"Validation failed: {e}")
             sys.exit(1)
@@ -242,6 +246,7 @@ def generate(
             logger.debug(
                 f"Generation parameters: prompt_length={len(prompt_text)}, "
                 f"aspect_ratio={aspect_ratio}, model={model}, "
+                f"resolution={resolution or 'default'}, "
                 f"reference_images={len(images) if images else 0}"
             )
 
@@ -252,6 +257,7 @@ def generate(
                 reference_images=list(images) if images else None,
                 aspect_ratio=aspect_ratio,
                 model=model,
+                resolution=resolution,
             )
 
             # Output JSON result to stdout
