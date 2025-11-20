@@ -130,6 +130,26 @@ gemini-nano-banana-tool --version
 gemini-nano-banana-tool --help
 ```
 
+### Shell Completion (Optional)
+
+Enable shell completion for faster command-line usage:
+
+```bash
+# For Bash (add to ~/.bashrc):
+eval "$(gemini-nano-banana-tool completion bash)"
+
+# For Zsh (add to ~/.zshrc):
+eval "$(gemini-nano-banana-tool completion zsh)"
+
+# For Fish (save to completions directory):
+gemini-nano-banana-tool completion fish > ~/.config/fish/completions/gemini-nano-banana-tool.fish
+```
+
+For help with shell completion:
+```bash
+gemini-nano-banana-tool completion --help
+```
+
 ## Configuration
 
 ### Gemini Developer API (Recommended)

@@ -78,6 +78,51 @@ def main(ctx: click.Context) -> None:
     ctx.ensure_object(dict)
 
 
+@main.command()
+@click.argument("shell", type=click.Choice(["bash", "zsh", "fish"]))
+def completion(shell: str) -> None:
+    """Generate shell completion script.
+
+    SHELL: The shell type (bash, zsh, fish)
+
+    Install instructions:
+
+    \b
+    # Bash (add to ~/.bashrc):
+    eval "$(gemini-nano-banana-tool completion bash)"
+
+    \b
+    # Zsh (add to ~/.zshrc):
+    eval "$(gemini-nano-banana-tool completion zsh)"
+
+    \b
+    # Fish (save to ~/.config/fish/completions/gemini-nano-banana-tool.fish):
+    gemini-nano-banana-tool completion fish > \\
+        ~/.config/fish/completions/gemini-nano-banana-tool.fish
+    """
+    # Import shell-specific completion classes
+    from click.shell_completion import BashComplete, FishComplete, ZshComplete
+
+    # Map shell names to completion classes
+    completion_classes = {
+        "bash": BashComplete,
+        "zsh": ZshComplete,
+        "fish": FishComplete,
+    }
+
+    completion_class = completion_classes.get(shell)
+    if completion_class:
+        completer = completion_class(
+            cli=main,
+            ctx_args={},
+            prog_name="gemini-nano-banana-tool",
+            complete_var="_GEMINI_NANO_BANANA_TOOL_COMPLETE",
+        )
+        click.echo(completer.source())
+    else:
+        raise click.BadParameter(f"Unsupported shell: {shell}")
+
+
 # Register commands
 main.add_command(promptgen)
 main.add_command(generate)
