@@ -9,6 +9,7 @@ from typing import Any
 from google import genai
 from google.genai import types
 
+from .models import COST_PER_TOKEN
 from .prompt_templates import detect_category, get_template
 
 
@@ -42,6 +43,7 @@ def generate_prompt(
             - category: Detected or specified category
             - style: Specified style (if any)
             - tokens_used: Token count for generation
+            - estimated_cost_usd: Estimated cost in USD (rounded to 4 decimals)
 
     Raises:
         PromptGenerationError: If prompt generation fails
@@ -119,7 +121,13 @@ Make the prompt detailed but concise (aim for 50-100 words).
         generated_prompt = text_content.strip()
 
         # Get token count
-        token_count = response.usage_metadata.total_token_count if response.usage_metadata else 0
+        token_count = (
+            response.usage_metadata.total_token_count if response.usage_metadata else 0
+        ) or 0
+
+        # Calculate cost based on token usage
+        cost_per_token = COST_PER_TOKEN.get(model, 0.0)
+        estimated_cost = token_count * cost_per_token if token_count > 0 else 0.0
 
         return {
             "prompt": generated_prompt,
@@ -128,6 +136,7 @@ Make the prompt detailed but concise (aim for 50-100 words).
             "category": detected_category or category,
             "style": style,
             "tokens_used": token_count,
+            "estimated_cost_usd": round(estimated_cost, 4),
         }
 
     except Exception as e:
@@ -172,6 +181,7 @@ def format_verbose_output(result: dict[str, Any]) -> str:
     lines.extend(
         [
             f"Tokens Used: {result['tokens_used']}",
+            f"Estimated Cost: ${result['estimated_cost_usd']:.4f}",
             "",
             "=" * 70,
             "Generated Prompt:",

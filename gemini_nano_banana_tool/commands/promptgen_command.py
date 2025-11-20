@@ -79,8 +79,8 @@ from gemini_nano_banana_tool.core.promptgen import (
 @click.option(
     "-m",
     "--model",
-    default="gemini-2.0-flash-exp",
-    help="LLM model for generation (default: gemini-2.0-flash-exp)",
+    default="gemini-3-pro",
+    help="LLM model for generation (default: gemini-3-pro)",
 )
 @click.option(
     "--api-key",
@@ -121,8 +121,8 @@ def promptgen(
 ) -> None:
     """Generate detailed image prompts from simple descriptions.
 
-    Transform basic descriptions into detailed, effective prompts following
-    best practices for Gemini 2.5 Flash Image generation.
+    Transform basic descriptions into detailed, effective prompts using
+    Gemini 3 Pro for enhanced prompt engineering.
 
     \b
     Examples:
@@ -163,8 +163,8 @@ def promptgen(
     \b
     Output Format:
       Default: Plain text prompt to stdout (pipeable)
-      --json: JSON with metadata (prompt, category, tokens, etc.)
-      --verbose: Human-readable analysis with prompt breakdown
+      --json: JSON with metadata (prompt, category, tokens, cost, etc.)
+      --verbose: Human-readable analysis with prompt breakdown and cost
 
     \b
     Available Templates:
