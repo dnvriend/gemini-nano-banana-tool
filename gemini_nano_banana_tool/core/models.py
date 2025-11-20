@@ -105,10 +105,12 @@ DEFAULT_RESOLUTION = "1K"
 # Pro Image: $120/1M tokens = $0.00012 per token
 # Flash Text: $0.30/1M tokens = $0.0000003 per token
 # Pro Text: $12/1M tokens = $0.000012 per token
+# Experimental models: Free during preview (using Flash pricing as reference)
 COST_PER_TOKEN: dict[str, float] = {
     "gemini-2.5-flash-image": 0.00003,  # $30 per 1M tokens (image generation)
     "gemini-3-pro-image-preview": 0.00012,  # $120 per 1M tokens (image generation)
     "gemini-2.5-flash": 0.0000003,  # $0.30 per 1M tokens (text generation)
+    "gemini-2.0-flash-exp": 0.0000003,  # Free preview, using Flash pricing as reference
     "gemini-3-pro-preview": 0.000012,  # $12 per 1M tokens (text generation)
 }
 

@@ -87,8 +87,8 @@ logger = get_logger(__name__)
 @click.option(
     "-m",
     "--model",
-    default="gemini-2.5-flash",
-    help="LLM model for generation (default: gemini-2.5-flash)",
+    default="gemini-2.0-flash-exp",
+    help="LLM model for generation (default: gemini-2.0-flash-exp)",
 )
 @click.option(
     "--api-key",
@@ -131,7 +131,7 @@ def promptgen(
     """Generate detailed image prompts from simple descriptions.
 
     Transform basic descriptions into detailed, effective prompts using
-    Gemini 2.5 Flash for enhanced prompt engineering.
+    Gemini 2.0 Flash (Experimental) for enhanced prompt engineering.
 
     \b
     Examples:
