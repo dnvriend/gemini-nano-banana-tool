@@ -314,9 +314,12 @@ gemini-nano-banana-tool generate "test" -o output.png -vvv
 #### Model Selection
 
 ```bash
-# Use specific model
+# Use default model (fast, high-quality)
+gemini-nano-banana-tool generate "Your prompt" -o output.png
+
+# Use advanced model (higher quality, more features)
 gemini-nano-banana-tool generate "Your prompt" -o output.png \
-  --model gemini-2.0-flash-exp
+  --model gemini-3-pro-image-preview
 
 # Default model is gemini-2.5-flash-image
 ```
@@ -356,9 +359,7 @@ Output:
 ```
 Available Gemini Image Generation Models:
   • gemini-2.5-flash-image (default) - Fast, high-quality image generation
-  • gemini-2.0-flash-exp - Experimental features
-  • gemini-1.5-pro - Higher quality, slower generation
-  • gemini-1.5-flash - Fast generation
+  • gemini-3-pro-image-preview - Advanced model with higher quality and more features
 ```
 
 #### List Aspect Ratios

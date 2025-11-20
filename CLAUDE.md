@@ -125,9 +125,7 @@ ASPECT_RATIO_RESOLUTIONS: dict[str, tuple[int, int]] = {
 
 SUPPORTED_MODELS: list[str] = [
     "gemini-2.5-flash-image",  # default
-    "gemini-2.0-flash-exp",
-    "gemini-1.5-pro",
-    "gemini-1.5-flash",
+    "gemini-3-pro-image-preview",
 ]
 
 DEFAULT_MODEL = "gemini-2.5-flash-image"
@@ -259,9 +257,7 @@ List available Gemini models.
 ```
 Available Gemini Image Generation Models:
   • gemini-2.5-flash-image (default) - Fast, high-quality image generation
-  • gemini-2.0-flash-exp - Experimental features
-  • gemini-1.5-pro - Higher quality, slower generation
-  • gemini-1.5-flash - Fast generation
+  • gemini-3-pro-image-preview - Advanced model with higher quality and more features
 ```
 
 ### list-aspect-ratios

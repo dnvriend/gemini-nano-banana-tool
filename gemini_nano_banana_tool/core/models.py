@@ -53,17 +53,13 @@ class AspectRatio(str, Enum):
 # Supported Gemini models for image generation
 SUPPORTED_MODELS: list[str] = [
     "gemini-2.5-flash-image",
-    "gemini-2.0-flash-exp",
-    "gemini-1.5-pro",
-    "gemini-1.5-flash",
+    "gemini-3-pro-image-preview",
 ]
 
 # Model descriptions for help text
 MODEL_DESCRIPTIONS: dict[str, str] = {
-    "gemini-2.5-flash-image": "Fast, high-quality image generation (default)",
-    "gemini-2.0-flash-exp": "Experimental features",
-    "gemini-1.5-pro": "Higher quality, slower generation",
-    "gemini-1.5-flash": "Fast generation",
+    "gemini-2.5-flash-image": "Fast, high-quality image generation",
+    "gemini-3-pro-image-preview": "Advanced model with higher quality and more features",
 }
 
 # Default model
