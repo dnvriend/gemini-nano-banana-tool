@@ -69,7 +69,7 @@ def test_validate_model_valid() -> None:
     """Test validating valid models."""
     # Should not raise
     validate_model("gemini-2.5-flash-image")
-    validate_model("gemini-2.0-flash-exp")
+    validate_model("gemini-3-pro-image-preview")
 
 
 def test_validate_model_invalid() -> None:

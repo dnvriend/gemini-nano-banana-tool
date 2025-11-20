@@ -8,6 +8,7 @@ import click
 
 from gemini_nano_banana_tool.commands import (
     generate,
+    generate_conversation,
     list_aspect_ratios,
     list_models,
     promptgen,
@@ -77,6 +78,7 @@ def main(ctx: click.Context) -> None:
 # Register commands
 main.add_command(promptgen)
 main.add_command(generate)
+main.add_command(generate_conversation)
 main.add_command(list_models)
 main.add_command(list_aspect_ratios)
 

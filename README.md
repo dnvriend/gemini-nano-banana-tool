@@ -29,6 +29,7 @@
 - [Usage](#usage)
   - [Promptgen Command](#promptgen-command)
   - [Generate Command](#generate-command)
+  - [Generate Conversation Command](#generate-conversation-command)
   - [List Commands](#list-commands)
 - [Library Usage](#library-usage)
 - [Resources](#resources)
@@ -76,6 +77,7 @@ This tool provides a **professional, agent-friendly CLI** for Gemini image gener
 - ✅ **AI Prompt Generation** - Transform simple descriptions into detailed prompts using Gemini 2.0 Flash
 - ✅ **Prompt Templates** - 6 specialized templates (photography, character, scene, food, abstract, logo)
 - ✅ **Text-to-Image Generation** - Create images from detailed text prompts
+- ✅ **Multi-turn Conversations** - Progressive image refinement through conversational turns
 - ✅ **Image Editing** - Edit existing images with up to 3 reference images
 - ✅ **Multiple Aspect Ratios** - Support for 10 different aspect ratios
 - ✅ **Flexible Prompt Input** - From argument, file, or stdin
@@ -346,6 +348,147 @@ Options:
   -v, --verbose                  Multi-level verbosity (-v INFO, -vv DEBUG, -vvv TRACE)
   --help                         Show this message and exit
 ```
+
+### Generate Conversation Command
+
+The `generate-conversation` command enables multi-turn image generation through conversational refinement. Each turn builds on previous context, allowing progressive improvements without starting over.
+
+#### Why Use Conversation Mode?
+
+Multi-turn conversation provides several advantages over single-shot generation:
+
+- **Progressive Refinement** - Iteratively improve images without losing context
+- **Experiment Safely** - Try variations while maintaining consistency
+- **Context Awareness** - Each turn references previous outputs automatically
+- **Evolution Tracking** - Complete history of prompts and changes
+- **Resume Anytime** - Continue conversations across sessions
+
+#### How It Works
+
+1. **First Turn** - Create initial image from prompt, save conversation state
+2. **Subsequent Turns** - Previous output becomes automatic reference image
+3. **Persistence** - All turns, prompts, and metadata saved to JSON file
+4. **Resume** - Load conversation file to continue refinement
+
+#### Basic Usage
+
+```bash
+# Start new conversation
+gemini-nano-banana-tool generate-conversation "A sunset over mountains" \
+  -o sunset1.png --file conversation.json
+
+# Continue with refinements (loads conversation automatically)
+gemini-nano-banana-tool generate-conversation "Make the sky more orange" \
+  -o sunset2.png --file conversation.json
+
+# Further refinement
+gemini-nano-banana-tool generate-conversation "Add a lake in the foreground" \
+  -o sunset3.png --file conversation.json
+```
+
+#### Complete Workflow Example
+
+```bash
+# Turn 1: Initial generation
+gemini-nano-banana-tool generate-conversation \
+  "A modern minimalist living room with large windows" \
+  -o room-v1.png \
+  --file interior-design.json \
+  --aspect-ratio 16:9
+
+# Turn 2: Add furniture
+gemini-nano-banana-tool generate-conversation \
+  "Add a gray sofa and wooden coffee table" \
+  -o room-v2.png \
+  --file interior-design.json
+
+# Turn 3: Adjust lighting
+gemini-nano-banana-tool generate-conversation \
+  "Make the lighting warmer and add floor lamp" \
+  -o room-v3.png \
+  --file interior-design.json
+
+# Turn 4: Final touches
+gemini-nano-banana-tool generate-conversation \
+  "Add plants and artwork on the walls" \
+  -o room-final.png \
+  --file interior-design.json
+```
+
+#### Conversation File Format
+
+The conversation file is JSON with complete history:
+
+```json
+{
+  "conversation_id": "20251120_181305",
+  "model": "gemini-2.5-flash-image",
+  "aspect_ratio": "16:9",
+  "turns": [
+    {
+      "prompt": "A sunset over mountains",
+      "output_path": "/path/to/sunset1.png",
+      "reference_images": [],
+      "metadata": {
+        "token_count": 1295,
+        "resolution": "1344x768",
+        "finish_reason": "STOP"
+      },
+      "timestamp": "2025-11-20T18:13:11.428020"
+    },
+    {
+      "prompt": "Make the sky more orange",
+      "output_path": "/path/to/sunset2.png",
+      "reference_images": ["/path/to/sunset1.png"],
+      "metadata": {
+        "token_count": 1554,
+        "resolution": "1344x768",
+        "finish_reason": "STOP"
+      },
+      "timestamp": "2025-11-20T18:13:27.318416"
+    }
+  ],
+  "created_at": "2025-11-20T18:13:05.751502",
+  "updated_at": "2025-11-20T18:13:27.318430"
+}
+```
+
+#### Conversation Options
+
+```bash
+gemini-nano-banana-tool generate-conversation [PROMPT] [OPTIONS]
+
+Arguments:
+  PROMPT                         Text prompt for this turn [required]
+
+Options:
+  -o, --output PATH              Output image file path [required]
+  -f, --file PATH                Conversation file (creates new if doesn't exist)
+  -a, --aspect-ratio TEXT        Aspect ratio (default: 1:1, only for new conversations)
+  -m, --model TEXT               Gemini model (default: gemini-2.5-flash-image, only for new)
+  --api-key TEXT                 Override API key from environment
+  --use-vertex                   Use Vertex AI instead of Developer API
+  --project TEXT                 Google Cloud project (for Vertex AI)
+  --location TEXT                Google Cloud location (for Vertex AI)
+  -v, --verbose                  Multi-level verbosity (-v INFO, -vv DEBUG, -vvv TRACE)
+  --help                         Show this message and exit
+```
+
+#### Important Notes
+
+- **Model & Aspect Ratio**: Only set when creating new conversation (locked for subsequent turns)
+- **Reference Images**: Previous output automatically used as reference (no manual `-i` needed)
+- **Resume Anytime**: Load conversation file to continue from any turn
+- **No File Flag**: Can use without `--file` but conversation won't be saved
+
+#### Use Cases
+
+- **Product Photography** - Iteratively adjust lighting, angles, and styling
+- **Character Design** - Refine poses, clothing, and expressions progressively
+- **Interior Design** - Build rooms by adding furniture and decor step by step
+- **Marketing Materials** - Test variations while maintaining brand consistency
+- **Concept Art** - Explore different iterations of a design concept
+- **Fashion E-commerce** - Try different products on models or in settings
 
 ### List Commands
 
