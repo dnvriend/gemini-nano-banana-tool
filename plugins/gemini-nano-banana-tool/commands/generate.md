@@ -2,10 +2,13 @@
 
 Generate images from text prompts with optional reference images using Google Gemini models.
 
+**Alias:** `generate-image` (can be used interchangeably with `generate`)
+
 ## Usage
 
 ```bash
 gemini-nano-banana-tool generate [PROMPT] -o OUTPUT [OPTIONS]
+gemini-nano-banana-tool generate-image [PROMPT] -o OUTPUT [OPTIONS]  # Alias
 ```
 
 ## Arguments
@@ -45,8 +48,9 @@ gemini-nano-banana-tool generate [PROMPT] -o OUTPUT [OPTIONS]
 ### Basic Text-to-Image
 
 ```bash
-# Simple generation
+# Simple generation (both commands work)
 gemini-nano-banana-tool generate "A cat wearing a wizard hat" -o cat.png
+gemini-nano-banana-tool generate-image "A cat wearing a wizard hat" -o cat.png
 
 # With aspect ratio
 gemini-nano-banana-tool generate "Mountain landscape" -o landscape.png -a 16:9

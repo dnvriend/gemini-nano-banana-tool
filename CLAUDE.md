@@ -202,9 +202,9 @@ def save_image(image_data: bytes, output_path: str) -> None:
 
 ## CLI Commands
 
-### generate
+### generate / generate-image
 
-Main command for image generation.
+Main command for image generation. The `generate-image` command is an alias for `generate`.
 
 **Signature:**
 ```python
@@ -333,6 +333,7 @@ make pipeline                  # format + check + build + install-global
 # Run without installing
 make run ARGS="--help"
 make run ARGS="generate 'test prompt' -o test.png"
+make run ARGS="generate-image 'test prompt' -o test.png"  # Using alias
 
 # Or directly
 uv run gemini-nano-banana-tool --help

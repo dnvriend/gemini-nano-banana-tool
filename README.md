@@ -275,13 +275,14 @@ gemini-nano-banana-tool promptgen --list-templates
 
 ### Generate Command
 
-The `generate` command creates images from text prompts with optional reference images.
+The `generate` command (or its alias `generate-image`) creates images from text prompts with optional reference images.
 
 #### Basic Text-to-Image
 
 ```bash
-# Simple generation with positional argument
+# Simple generation with positional argument (both commands are equivalent)
 gemini-nano-banana-tool generate "A photorealistic cat wearing a wizard hat" -o cat.png
+gemini-nano-banana-tool generate-image "A photorealistic cat wearing a wizard hat" -o cat.png
 
 # With specific aspect ratio
 gemini-nano-banana-tool generate "Panoramic mountain landscape" -o wide.png --aspect-ratio 16:9
@@ -386,6 +387,7 @@ gemini-nano-banana-tool generate "Your prompt" -o output.png \
 
 ```bash
 gemini-nano-banana-tool generate [PROMPT] [OPTIONS]
+gemini-nano-banana-tool generate-image [PROMPT] [OPTIONS]  # Alias
 
 Arguments:
   PROMPT                         Text prompt (mutually exclusive with --prompt-file and --stdin)

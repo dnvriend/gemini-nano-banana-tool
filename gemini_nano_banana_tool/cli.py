@@ -57,8 +57,9 @@ def main(ctx: click.Context) -> None:
       gemini-nano-banana-tool promptgen "wizard cat" | \\
         gemini-nano-banana-tool generate -o cat.png --stdin
 
-      # Generate image from text
+      # Generate image from text (both commands are equivalent)
       gemini-nano-banana-tool generate -o cat.png --prompt "A cat wearing a wizard hat"
+      gemini-nano-banana-tool generate-image -o cat.png --prompt "A cat wearing a wizard hat"
 
       # Edit image with reference
       gemini-nano-banana-tool generate -o edited.png -i photo.jpg --prompt "Add a hat"
@@ -71,6 +72,7 @@ def main(ctx: click.Context) -> None:
     For detailed command help:
       gemini-nano-banana-tool promptgen --help
       gemini-nano-banana-tool generate --help
+      gemini-nano-banana-tool generate-image --help
       gemini-nano-banana-tool list-models --help
       gemini-nano-banana-tool list-aspect-ratios --help
     """
@@ -126,6 +128,7 @@ def completion(shell: str) -> None:
 # Register commands
 main.add_command(promptgen)
 main.add_command(generate)
+main.add_command(generate, name="generate-image")  # Alias for generate
 main.add_command(generate_conversation)
 main.add_command(list_models)
 main.add_command(list_aspect_ratios)

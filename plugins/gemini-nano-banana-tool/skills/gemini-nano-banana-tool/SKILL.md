@@ -8,8 +8,9 @@ Professional CLI for Google Gemini image generation with AI-powered prompt optim
 # AI prompt optimization
 gemini-nano-banana-tool promptgen "simple description"
 
-# Generate image
+# Generate image (both commands work)
 gemini-nano-banana-tool generate "detailed prompt" -o output.png
+gemini-nano-banana-tool generate-image "detailed prompt" -o output.png
 
 # Multi-turn refinement
 gemini-nano-banana-tool generate-conversation "prompt" -o output.png -f conv.json
@@ -47,11 +48,12 @@ gemini-nano-banana-tool promptgen "cyberpunk city" --template scene | \
 
 ### 2. Text-to-Image Generation
 
-Generate images from prompts with flexible input:
+Generate images from prompts with flexible input (use `generate` or `generate-image` interchangeably):
 
 ```bash
-# From positional argument
+# From positional argument (both commands work)
 gemini-nano-banana-tool generate "A cat wearing a wizard hat" -o cat.png
+gemini-nano-banana-tool generate-image "A cat wearing a wizard hat" -o cat.png
 
 # From file
 gemini-nano-banana-tool generate -f prompt.txt -o output.png
