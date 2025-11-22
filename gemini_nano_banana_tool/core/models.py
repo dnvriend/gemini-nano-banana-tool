@@ -64,10 +64,15 @@ class AspectRatio(str, Enum):
     RATIO_5_4 = "5:4"
 
 
-# Supported Gemini models for image generation
+# Supported models for image generation (Gemini + Imagen)
 SUPPORTED_MODELS: list[str] = [
+    # Gemini models (Nano Banana)
     "gemini-2.5-flash-image",
     "gemini-3-pro-image-preview",
+    # Imagen 4 models
+    "imagen-4.0-generate-001",
+    "imagen-4.0-ultra-generate-001",
+    "imagen-4.0-fast-generate-001",
 ]
 
 # Model descriptions for help text
@@ -76,6 +81,9 @@ MODEL_DESCRIPTIONS: dict[str, str] = {
     "gemini-3-pro-image-preview": (
         "Advanced quality, 1K/2K/4K resolution, 14 ref images, Google Search grounding"
     ),
+    "imagen-4.0-generate-001": "Balanced quality and speed, photorealistic generation",
+    "imagen-4.0-ultra-generate-001": "Highest quality, photorealism focus, slower generation",
+    "imagen-4.0-fast-generate-001": "Fastest generation, good quality, cost-effective",
 }
 
 # Default model
@@ -99,7 +107,7 @@ MODELS_WITH_RESOLUTION_SUPPORT: list[str] = [
 # Default resolution for Pro model
 DEFAULT_RESOLUTION = "1K"
 
-# Pricing per output token (USD)
+# Pricing per output token (USD) - Gemini models
 # Source: https://ai.google.dev/pricing
 # Flash Image: $30/1M tokens = $0.00003 per token
 # Pro Image: $120/1M tokens = $0.00012 per token
@@ -114,7 +122,24 @@ COST_PER_TOKEN: dict[str, float] = {
     "gemini-3-pro-preview": 0.000012,  # $12 per 1M tokens (text generation)
 }
 
+# Pricing per image (USD) - Imagen 4 models
+# Source: https://cloud.google.com/vertex-ai/generative-ai/pricing
+COST_PER_IMAGE: dict[str, float] = {
+    "imagen-4.0-generate-001": 0.04,  # $0.04 per image
+    "imagen-4.0-ultra-generate-001": 0.06,  # $0.06 per image
+    "imagen-4.0-fast-generate-001": 0.02,  # $0.02 per image
+}
+
 # Example costs per image based on typical token usage:
-# Flash: 1,290 tokens × $0.00003 = ~$0.039 per image
-# Pro 1K/2K: 1,120 tokens × $0.00012 = ~$0.134 per image
-# Pro 4K: 2,000 tokens × $0.00012 = ~$0.24 per image
+# Gemini Flash: 1,290 tokens × $0.00003 = ~$0.039 per image
+# Gemini Pro 1K/2K: 1,120 tokens × $0.00012 = ~$0.134 per image
+# Gemini Pro 4K: 2,000 tokens × $0.00012 = ~$0.24 per image
+# Imagen 4 Fast: $0.02 per image (flat rate)
+# Imagen 4: $0.04 per image (flat rate)
+# Imagen 4 Ultra: $0.06 per image (flat rate)
+
+
+# Helper function to check if model uses Imagen API
+def is_imagen_model(model: str) -> bool:
+    """Check if model is an Imagen model (vs Gemini model)."""
+    return model.startswith("imagen-")

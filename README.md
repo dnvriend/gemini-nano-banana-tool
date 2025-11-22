@@ -15,7 +15,7 @@
 [![Claude Sonnet 4.5](https://img.shields.io/badge/Model-Claude_Sonnet_4.5-blue)](https://www.anthropic.com/claude)
 [![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code-5A67D8.svg)](https://www.anthropic.com/claude/code)
 
-**Gemini Nano Banana Tool** - Professional CLI for generating, editing, and manipulating images using Google's Gemini image generation models (Nano Banana & Nano Banana 2)
+**Gemini Nano Banana Tool** - Professional CLI for generating, editing, and manipulating images using Google's Gemini and Imagen 4 image generation models
 
 </div>
 
@@ -42,22 +42,40 @@
 
 ### What is Nano Banana?
 
-Google's Gemini image generation models come in two flavors:
+This tool supports Google's image generation models across two families:
+
+#### Gemini Models (Nano Banana)
 
 **Nano Banana (gemini-2.5-flash-image)** - Fast image generation with fixed ~1024p resolution (up to 3 reference images)
 **Nano Banana 2 (gemini-3-pro-image-preview)** - Advanced pro model with 1K/2K/4K resolution support (up to 14 reference images)
 
-Both models provide:
-
+Features:
 - 🎨 High-quality text-to-image generation
 - 🖼️ Image editing with natural language prompts
 - 🔄 Multi-image composition (3 images for Flash, 14 images for Pro)
 - 📐 Multiple aspect ratios (1:1, 16:9, 9:16, and more)
 - 🎯 Variable resolution (Pro model: 1K/2K/4K quality levels)
 - 🎭 Style transfer and artistic rendering
-- ✨ Built-in SynthID watermarking for authenticity
 
-Learn more: [Google Gemini Image Generation Documentation](https://ai.google.dev/gemini-api/docs/image-generation)
+#### Imagen 4 Models
+
+**Imagen 4 Fast (imagen-4.0-fast-generate-001)** - Fastest generation, cost-effective ($0.02/image)
+**Imagen 4 (imagen-4.0-generate-001)** - Balanced quality and speed ($0.04/image)
+**Imagen 4 Ultra (imagen-4.0-ultra-generate-001)** - Highest quality photorealism ($0.06/image)
+
+Features:
+- 📸 Photorealistic image generation
+- ⚡ Fast generation times (especially Fast variant)
+- 💰 Simple per-image pricing
+- 🎯 High-quality outputs across all variants
+
+All models provide:
+- ✨ Built-in SynthID watermarking for authenticity
+- 📐 Multiple aspect ratios (1:1, 16:9, 9:16, 4:3, 3:4, and more)
+
+Learn more:
+- [Gemini Image Generation Documentation](https://ai.google.dev/gemini-api/docs/image-generation)
+- [Imagen 4 on Vertex AI](https://cloud.google.com/vertex-ai/generative-ai/docs/image/overview)
 
 ### Why This CLI?
 
@@ -346,15 +364,74 @@ gemini-nano-banana-tool generate "test" -o output.png -vvv
 #### Model Selection
 
 ```bash
-# Use default model (fast, high-quality, fixed ~1024p)
+# Use default Gemini model (fast, high-quality, fixed ~1024p)
 gemini-nano-banana-tool generate "Your prompt" -o output.png
 
-# Use advanced model (higher quality, variable resolution, more features)
+# Use advanced Gemini model (higher quality, variable resolution, more features)
 gemini-nano-banana-tool generate "Your prompt" -o output.png \
   --model gemini-3-pro-image-preview
 
+# Use Imagen 4 Fast (fastest, $0.02/image)
+gemini-nano-banana-tool generate "Your prompt" -o output.png \
+  --model imagen-4.0-fast-generate-001
+
+# Use Imagen 4 (balanced quality/speed, $0.04/image)
+gemini-nano-banana-tool generate "Your prompt" -o output.png \
+  --model imagen-4.0-generate-001
+
+# Use Imagen 4 Ultra (highest quality photorealism, $0.06/image)
+gemini-nano-banana-tool generate "Your prompt" -o output.png \
+  --model imagen-4.0-ultra-generate-001
+
 # Default model is gemini-2.5-flash-image
 ```
+
+#### Automatic Prompt Enhancement
+
+Use the `--promptgen` flag to automatically enhance your simple prompt with AI before generating the image:
+
+```bash
+# Simple prompt → AI-enhanced prompt → generate image
+gemini-nano-banana-tool generate "wizard cat" -o wizard.png --promptgen
+
+# With template for specific style
+gemini-nano-banana-tool generate "portrait" -o portrait.png \
+  --promptgen --promptgen-template photography
+
+# Works with all models
+gemini-nano-banana-tool generate "sunset" -o sunset.png \
+  --promptgen --model imagen-4.0-generate-001
+
+# Combines with all other options
+gemini-nano-banana-tool generate "cyberpunk city" -o city.png \
+  --promptgen --promptgen-template scene \
+  --aspect-ratio 16:9 \
+  --model gemini-3-pro-image-preview
+```
+
+**Available Templates:**
+- `photography` - Professional photography with technical details
+- `character` - Character design with pose and attire
+- `scene` - Scene composition with foreground/midground/background
+- `food` - Food photography with plating and lighting
+- `abstract` - Abstract art with shapes and colors
+- `logo` - Logo design with typography
+
+**How It Works:**
+1. Your simple prompt is sent to Gemini 2.0 Flash
+2. AI generates a detailed, optimized prompt (50-100 words)
+3. Enhanced prompt is used for image generation
+4. Output JSON includes both original and enhanced prompts
+
+**Benefits:**
+- Transform "sunset" into "A breathtaking sunset over the ocean with vibrant orange..."
+- Automatically includes composition, lighting, and technical details
+- No need to know photography or art terminology
+- Consistent high-quality results
+
+**Cost:**
+- Promptgen: ~$0.0001-0.0003 per enhancement (Gemini Flash text generation)
+- Plus image generation cost (varies by model)
 
 #### Resolution Quality (Pro Model Only)
 
@@ -400,6 +477,8 @@ Options:
   -a, --aspect-ratio TEXT        Aspect ratio (default: 1:1)
   -m, --model TEXT               Gemini model (default: gemini-2.5-flash-image)
   -r, --resolution TEXT          Resolution quality (Pro only: 1K/2K/4K)
+  --promptgen                    Enhance prompt with AI before generating
+  --promptgen-template TEXT      Template for prompt enhancement (photography, character, scene, food, abstract, logo)
   --api-key TEXT                 Override API key from environment
   --use-vertex                   Use Vertex AI instead of Developer API
   --project TEXT                 Google Cloud project (for Vertex AI)
@@ -559,9 +638,24 @@ gemini-nano-banana-tool list-models
 
 Output:
 ```
-Available Gemini Image Generation Models:
-  • gemini-2.5-flash-image (default) - Fast, high-quality image generation
-  • gemini-3-pro-image-preview - Advanced model with higher quality and more features
+Gemini Image Generation Models:
+  • gemini-2.5-flash-image (default)
+    Fast generation, fixed ~1024p resolution, 3 ref images
+    Pricing: ~$30/1M tokens
+  • gemini-3-pro-image-preview
+    Advanced quality, 1K/2K/4K resolution, 14 ref images, Google Search grounding
+    Pricing: ~$120/1M tokens
+
+Imagen 4 Models:
+  • imagen-4.0-fast-generate-001
+    Fastest generation, good quality, cost-effective
+    Pricing: $0.02/image
+  • imagen-4.0-generate-001
+    Balanced quality and speed, photorealistic generation
+    Pricing: $0.04/image
+  • imagen-4.0-ultra-generate-001
+    Highest quality, photorealism focus, slower generation
+    Pricing: $0.06/image
 ```
 
 #### List Aspect Ratios

@@ -12,6 +12,7 @@ import click
 from gemini_nano_banana_tool.core.client import AuthenticationError, create_client
 from gemini_nano_banana_tool.core.generator import GenerationError, generate_image
 from gemini_nano_banana_tool.core.models import DEFAULT_MODEL
+from gemini_nano_banana_tool.core.promptgen import PromptGenerationError, generate_prompt
 from gemini_nano_banana_tool.logging_config import get_logger, setup_logging
 from gemini_nano_banana_tool.utils import (
     ValidationError,
@@ -99,6 +100,19 @@ logger = get_logger(__name__)
     count=True,
     help="Enable verbose output (use -v for INFO, -vv for DEBUG, -vvv for TRACE)",
 )
+@click.option(
+    "--promptgen",
+    is_flag=True,
+    help="Enhance prompt using AI before generating image (uses Gemini 2.0 Flash)",
+)
+@click.option(
+    "--promptgen-template",
+    type=click.Choice(
+        ["photography", "character", "scene", "food", "abstract", "logo"],
+        case_sensitive=False,
+    ),
+    help="Template for prompt enhancement (requires --promptgen)",
+)
 def generate(
     prompt: str | None,
     output: str,
@@ -113,6 +127,8 @@ def generate(
     project: str | None,
     location: str | None,
     verbose: int,
+    promptgen: bool,
+    promptgen_template: str | None,
 ) -> None:
     """Generate images from text prompts with optional reference images.
 
@@ -149,6 +165,13 @@ def generate(
 
       # Trace mode (DEBUG + library internals)
       gemini-nano-banana-tool generate "test prompt" -o output.png -vvv
+
+      # Enhance prompt with AI (automatic prompt engineering)
+      gemini-nano-banana-tool generate "sunset" -o sunset.png --promptgen
+
+      # With template for specific style
+      gemini-nano-banana-tool generate "portrait photo" -o portrait.png \\
+        --promptgen --promptgen-template photography
 
     \b
     Output Format:
@@ -203,6 +226,12 @@ def generate(
             logger.error(f"Prompt validation failed: {e}")
             sys.exit(1)
 
+        # Validate promptgen template option
+        if promptgen_template and not promptgen:
+            logger.error("--promptgen-template requires --promptgen flag")
+            click.echo("Error: --promptgen-template requires --promptgen flag", err=True)
+            sys.exit(1)
+
         # Validate inputs
         try:
             logger.debug("Validating inputs...")
@@ -240,6 +269,36 @@ def generate(
             logger.debug("Authentication error details:", exc_info=True)
             sys.exit(1)
 
+        # Enhance prompt if --promptgen flag is enabled
+        original_prompt = prompt_text
+        promptgen_result = None
+        if promptgen:
+            try:
+                logger.info("Enhancing prompt with AI...")
+                logger.debug(f"Original prompt: {prompt_text}")
+                if promptgen_template:
+                    logger.debug(f"Using template: {promptgen_template}")
+
+                promptgen_result = generate_prompt(
+                    client=client,
+                    description=prompt_text,
+                    template=promptgen_template,
+                )
+
+                # Replace prompt with enhanced version
+                prompt_text = promptgen_result["prompt"]
+                logger.info(f"Prompt enhanced ({len(prompt_text)} characters)")
+                logger.debug(f"Enhanced prompt: {prompt_text}")
+                logger.debug(
+                    f"Promptgen cost: ${promptgen_result['estimated_cost_usd']:.4f} "
+                    f"({promptgen_result['tokens_used']} tokens)"
+                )
+            except PromptGenerationError as e:
+                logger.error(f"Prompt enhancement failed: {e}")
+                logger.debug("Prompt enhancement error details:", exc_info=True)
+                click.echo(f"Error: Prompt enhancement failed: {e}", err=True)
+                sys.exit(1)
+
         # Generate image
         try:
             logger.info("Starting image generation...")
@@ -259,6 +318,19 @@ def generate(
                 model=model,
                 resolution=resolution,
             )
+
+            # Add promptgen metadata to result if used
+            if promptgen and promptgen_result:
+                result["promptgen"] = {
+                    "enabled": True,
+                    "original_prompt": original_prompt,
+                    "enhanced_prompt": prompt_text,
+                    "template_used": promptgen_result.get("template_used"),
+                    "tokens_used": promptgen_result["tokens_used"],
+                    "estimated_cost_usd": promptgen_result["estimated_cost_usd"],
+                }
+            else:
+                result["promptgen"] = {"enabled": False}
 
             # Output JSON result to stdout
             click.echo(json.dumps(result, indent=2))
