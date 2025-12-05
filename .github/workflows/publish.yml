@@ -1,0 +1,56 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      test-pypi:
+        description: 'Publish to Test PyPI instead of PyPI'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.test-pypi && 'test-pypi' || 'pypi' }}
+      url: ${{ inputs.test-pypi && 'https://test.pypi.org/project/gemini-nano-banana-tool/' || 'https://pypi.org/project/gemini-nano-banana-tool/' }}
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Build package
+        run: uv build --force-pep517
+
+      - name: Verify build artifacts
+        run: |
+          echo "Build artifacts:"
+          ls -lh dist/
+
+      - name: Publish to Test PyPI
+        if: ${{ inputs.test-pypi }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+
+      - name: Publish to PyPI
+        if: ${{ !inputs.test-pypi }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
